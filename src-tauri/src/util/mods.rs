@@ -1,6 +1,7 @@
 use std::io::{Result, prelude::*};
 use std::fs;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 use crate::mods::{Mod, ModType};
 
@@ -49,7 +50,8 @@ pub fn examine_mod(mod_name: String) -> Result<Mod> {
     let mut temp_path = mod_path.clone();
     temp_path.set_file_name("temp_mod_folder");
     println!("{}", mod_path.display());
-    let mut mod_zip = zip::ZipArchive::new(fs::File::open(mod_path)?)?;
+    let mut mod_zip = zip::ZipArchive::new(fs::File::open(&mod_path)?)?;
+    let mut mod_zip_two = zip::ZipArchive::new(fs::File::open(&mod_path)?)?;
     // mod_zip.extract(&temp_path)?;
     println!("here1");
     //let mut info_file = mod_zip.by_name("levels/c1/info.json")?;
@@ -61,7 +63,37 @@ pub fn examine_mod(mod_name: String) -> Result<Mod> {
             mod_type = ModType::Vehicle;
         }
         if mod_type == ModType::Map {
-            
+            if file.starts_with("levels/") && file.ends_with("/") && internal_name == "" {
+                let mut first_slash_found = false;
+                let mut temp_map_name = String::new();
+                for chr in file.chars() {
+                    if chr == '/' && first_slash_found == false {
+                        first_slash_found = true;
+                        continue;
+                    }
+                    if first_slash_found == true && chr == '/' {
+                        break;
+                    }
+                    if first_slash_found == true && chr != '/' {
+                        temp_map_name.push(chr);
+                    }
+                }
+                internal_name = temp_map_name;
+            }
+            if internal_name != "" {
+                println!("{}", internal_name);
+                let mut info_file_path = String::from("levels/");
+                info_file_path.push_str(&internal_name);
+                info_file_path.push_str("/info.json");
+
+                let mut string_json = String::new();
+                let mut info_file = mod_zip_two.by_name(&info_file_path)?;
+                info_file.read_to_string(&mut string_json);
+                let json: serde_json::Value = serde_json::from_str(&string_json).unwrap();
+
+                external_name = json["title"].to_string();
+                break;
+            }
         } else if mod_type == ModType::Vehicle {
 
         } else {
@@ -69,7 +101,10 @@ pub fn examine_mod(mod_name: String) -> Result<Mod> {
         }
     }
     println!("here2");
-    let mut string_json = String::new();
+
+    let final_mod = Mod::new(mod_type, external_name, internal_name, mod_name);
+    return Ok(final_mod);
+    //let mut string_json = String::new();
     //info_file.read_to_string(&mut string_json)?;
     //let json: serde_json::Value = serde_json::from_str(&string_json).unwrap();
     //external_name = json["title"].to_string();

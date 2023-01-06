@@ -11,16 +11,16 @@ pub enum ModType {
 pub struct Mod {
     pub mod_type: ModType,
     pub name: String,
-    pub internal_name: Option<String>,
+    pub internal_name: String,
     pub mod_file_name: String,
 }
 
 impl Mod {
-    pub fn new(mod_type: ModType, name: String, internal_name: Option<String>, mod_file_name: String) -> Self {
+    pub fn new(mod_type: ModType, name: String, internal_name: String, mod_file_name: String) -> Self {
         if mod_type == ModType::Map {
             Self {mod_type, name, internal_name, mod_file_name}
         } else {
-            Self {mod_type, name, internal_name: None, mod_file_name}
+            Self {mod_type, name, internal_name, mod_file_name}
         }
     }
 }
