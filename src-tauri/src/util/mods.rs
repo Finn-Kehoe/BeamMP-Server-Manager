@@ -95,7 +95,30 @@ pub fn examine_mod(mod_name: String) -> Result<Mod> {
                 break;
             }
         } else if mod_type == ModType::Vehicle {
-
+            let mut true_name_found = false;
+            if file.starts_with("vehicles/") && file.ends_with("/") && internal_name == "" {
+                let mut first_slash_found = false;
+                let mut temp_map_name = String::new();
+                for chr in file.chars() {
+                    if chr == '/' && first_slash_found == false {
+                        first_slash_found = true;
+                        continue;
+                    }
+                    if first_slash_found == true && chr == '/' {
+                        break;
+                    }
+                    if first_slash_found == true && chr != '/' {
+                        temp_map_name.push(chr);
+                    }
+                }
+                if temp_map_name == "common" {
+                    temp_map_name = String::new();
+                } else {
+                    true_name_found = true;
+                    println!("{}", temp_map_name);
+                    internal_name = temp_map_name;
+                }
+            }
         } else {
             continue;
         }
