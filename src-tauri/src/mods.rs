@@ -28,12 +28,12 @@ impl Mod {
     }
 }
 
-struct ModList {
+pub struct ModList {
     pub mods: Vec<Mod>,
 }
 
 impl ModList {
-    pub fn get_mods() -> Self {
+    pub fn init() -> Self {
         let mut mods: Vec<Mod> = Vec::new();
         let mod_names = get_list_of_mods().unwrap();
         for _mod in mod_names {
@@ -42,16 +42,48 @@ impl ModList {
 
         Self {mods}
     }
+
+    pub fn refresh(&mut self) {
+        self.mods.clear();
+        let mod_names = get_list_of_mods().unwrap();
+        for _mod in mod_names {
+            self.mods.push(examine_mod(_mod).unwrap())
+        }
+    }
 }
 
 #[tauri::command]
-pub fn get_mods() -> Vec<String> {
-    let mut mod_names: Vec<String> = Vec::new();
-    let mods = ModList::get_mods();
-    for _mod in mods.mods {
-        mod_names.push(_mod.name)
+pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
+    let mut modded_vehicles: Vec<String> = Vec::new();
+
+    for i in state.mods.iter() {
+        if i.mod_type == ModType::Vehicle {
+            modded_vehicles.push(i.name.clone())
+        }
     }
-    mod_names
+
+    if !modded_vehicles.is_empty() {
+        return Some(modded_vehicles);
+    } else {
+        return None;
+    }
+}
+
+#[tauri::command]
+pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
+    let mut modded_maps: Vec<String> = Vec::new();
+
+    for i in state.mods.iter() {
+        if i.mod_type == ModType::Map {
+            modded_maps.push(i.name.clone())
+        }
+    }
+
+    if !modded_maps.is_empty() {
+        return Some(modded_maps);
+    } else {
+        return None;
+    }
 }
 
 fn get_list_of_mods() -> Result<Vec<String>> {

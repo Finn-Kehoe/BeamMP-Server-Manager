@@ -8,16 +8,10 @@ mod map_change;
 mod update;
 mod util;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 fn main() {
-    println!("{:?}", mods::get_mods());
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, mods::get_mods])
+        .manage(mods::ModList::init())
+        .invoke_handler(tauri::generate_handler![mods::get_mod_vehicles, mods::get_mod_maps])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
