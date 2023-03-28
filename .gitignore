@@ -25,3 +25,4 @@ dist-ssr
 
 # Test files
 src-tauri/Resources
+src-tauri/ServerConfig.toml
