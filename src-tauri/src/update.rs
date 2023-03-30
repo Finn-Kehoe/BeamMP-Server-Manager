@@ -1,7 +1,7 @@
 use std::process::Command;
-use std::collections::HashMap;
 
 use reqwest;
+use serde_json;
 
 fn get_current_server_version() -> String {
     let raw_version = if cfg!(target_os = "windows") {
@@ -26,24 +26,57 @@ fn get_current_server_version() -> String {
             .stdout
     };
 
-    let mut raw_string_version = String::from_utf8(raw_version).unwrap();
-    raw_string_version.replace("BeamMP-Server v", "");
+    let raw_string_version = String::from_utf8(raw_version).unwrap();
+    let string_version = raw_string_version.replace("BeamMP-Server v", "");
 
-    raw_string_version
+    string_version
 }
 
-pub async fn get_latest_server_version() {
-    let response = reqwest::get("https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest")
-        .await
-        .unwrap()
-        .json::<HashMap<String, String>>()
-        .await
+pub fn get_latest_server_version() -> String {
+    let client = reqwest::blocking::Client::builder()
+        .user_agent("BeamMP-Server-Manager")
+        .build()
         .unwrap();
+    let response = client.get("https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest")
+        .send()
+        .unwrap()
+        .text()
+        .unwrap();
+    let json_response: serde_json::Value = serde_json::from_str(&response).unwrap();
 
-    println!("version: {}", response.get("name").unwrap())
+    let raw_name = json_response["name"].to_string();
+    let stripped_name = raw_name[1..].to_string();
+
+    stripped_name
 }
-/*
+
+fn get_numbers_from_version(version: String) -> Vec<u16> {
+    let mut numbers: Vec<u16> = Vec::new();
+    let mut current_number = String::new();
+    for chr in version.chars() {
+        if chr != '.' {
+            current_number.push(chr);
+        } else {
+            numbers.push(current_number.parse::<u16>().unwrap());
+            current_number.clear();
+            continue;
+        }
+    }
+
+    numbers
+}
+
 fn needs_update(local_version: String, latest_version: String) -> bool {
+    let mut needs_update = false;
+    let local_numbers = get_numbers_from_version(local_version);
+    let latest_numbers = get_numbers_from_version(latest_version);
 
+    for (i, num) in local_numbers.iter().enumerate() {
+        if latest_numbers[i] > *num {
+            needs_update = true;
+            break;
+        }
+    }
+
+    needs_update
 }
-*/
