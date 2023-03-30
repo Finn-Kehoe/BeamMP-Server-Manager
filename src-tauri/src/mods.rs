@@ -13,17 +13,17 @@ pub enum ModType {
 
 pub struct Mod {
     pub mod_type: ModType,
-    pub name: String,
+    pub external_name: String,
     pub internal_name: String,
     pub mod_file_name: String,
 }
 
 impl Mod {
-    pub fn new(mod_type: ModType, name: String, internal_name: String, mod_file_name: String) -> Self {
+    pub fn new(mod_type: ModType, external_name: String, internal_name: String, mod_file_name: String) -> Self {
         if mod_type == ModType::Map {
-            Self {mod_type, name, internal_name, mod_file_name}
+            Self {mod_type, external_name, internal_name, mod_file_name}
         } else {
-            Self {mod_type, name: internal_name.clone(), internal_name, mod_file_name}
+            Self {mod_type, external_name: internal_name.clone(), internal_name, mod_file_name}
         }
     }
 }
@@ -58,7 +58,7 @@ pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<String>>
 
     for i in state.mods.iter() {
         if i.mod_type == ModType::Vehicle {
-            modded_vehicles.push(i.name.clone())
+            modded_vehicles.push(i.external_name.clone())
         }
     }
 
@@ -75,7 +75,7 @@ pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
 
     for i in state.mods.iter() {
         if i.mod_type == ModType::Map {
-            modded_maps.push(i.name.clone())
+            modded_maps.push(i.external_name.clone())
         }
     }
 
@@ -179,8 +179,10 @@ fn examine_mod(mod_name: String) -> Result<Mod> {
         } else if mod_type == ModType::Vehicle {
             if file.starts_with("vehicles/") && file.ends_with("/") && internal_name == "" {
                 let temp_map_name = get_internal_mod_name(file)?;
+                // there is a "common" folder in every vehicle mod that we don't want
                 if temp_map_name != "common" {
                     internal_name = temp_map_name;
+                    break;
                 }
             }
         } else {

@@ -28,7 +28,7 @@ fn get_internal_map_name(external_name: String, state: tauri::State<ModList>) ->
         Some(_name) => internal_name = _name.to_string(),
         None => {
             for i in state.mods.iter() {
-                if external_name == i.name && i.mod_type == ModType::Map {
+                if external_name == i.external_name && i.mod_type == ModType::Map {
                     internal_name = i.internal_name.clone();
                     break;
                 }
