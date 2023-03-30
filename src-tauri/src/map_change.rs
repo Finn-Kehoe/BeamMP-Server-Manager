@@ -48,12 +48,12 @@ pub fn change_map(map_name: String, state: tauri::State<ModList>) -> bool {
     let mut server_config_file_path = std::env::current_dir().unwrap();
     server_config_file_path.push("ServerConfig.toml");
 
-    if server_config_file_path.is_file() {
+    return if server_config_file_path.is_file() {
         let mut config_contents = String::new();
         let mut new_config_contents = String::new();
         let mut file = fs::File::open(&server_config_file_path).unwrap();
 
-        file.read_to_string(&mut config_contents);
+        file.read_to_string(&mut config_contents).expect("unable to read server config file");
 
         for line in config_contents.lines() {
             if line.starts_with("Map = ") {
@@ -64,10 +64,10 @@ pub fn change_map(map_name: String, state: tauri::State<ModList>) -> bool {
         }
 
         let mut new_file = fs::File::create(server_config_file_path).unwrap();
-        new_file.write_all(new_config_contents.as_bytes());
+        new_file.write_all(new_config_contents.as_bytes()).expect("unable to write to server config file");
 
-        return true;
+        true
     } else {
-        return false;
+        false
     }
 }

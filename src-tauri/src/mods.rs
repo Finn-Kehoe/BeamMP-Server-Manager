@@ -62,10 +62,10 @@ pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<String>>
         }
     }
 
-    if !modded_vehicles.is_empty() {
-        return Some(modded_vehicles);
+    return if !modded_vehicles.is_empty() {
+        Some(modded_vehicles)
     } else {
-        return None;
+        None
     }
 }
 
@@ -79,10 +79,10 @@ pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
         }
     }
 
-    if !modded_maps.is_empty() {
-        return Some(modded_maps);
+    return if !modded_maps.is_empty() {
+        Some(modded_maps)
     } else {
-        return None;
+        None
     }
 }
 
@@ -99,9 +99,7 @@ fn get_list_of_mods() -> Result<Vec<String>> {
         for file in raw_mods_list {
             let mod_name = file
                 .unwrap()
-                .path()
                 .file_name()
-                .unwrap()
                 .to_str()
                 .unwrap()
                 .to_string();
