@@ -1,9 +1,10 @@
 use std::process::Command;
+use std::io;
 
 use reqwest;
 use serde_json;
 
-fn get_current_server_version() -> String {
+fn get_current_server_version() -> io::Result<String> {
     let raw_version = if cfg!(target_os = "windows") {
         Command::new(r".\BeamMP-Server.exe --version")
             .output()
@@ -11,11 +12,14 @@ fn get_current_server_version() -> String {
             .stdout
     } else {
         let mut server_name = String::new();
-        let this_dir = std::fs::read_dir(std::env::current_dir().unwrap()).unwrap();
+        let this_dir = std::fs::read_dir(std::env::current_dir()?)?;
         for file in this_dir {
-            let unwrapped_file = file.unwrap();
+            let unwrapped_file = file?;
             if unwrapped_file.file_name().to_str().unwrap().contains("BeamMP-Server-") {
-                server_name = unwrapped_file.file_name().to_str().unwrap().to_string();
+                server_name = unwrapped_file.file_name()
+                    .to_str()
+                    .unwrap()
+                    .to_string();
                 break;
             }
         }
@@ -26,28 +30,25 @@ fn get_current_server_version() -> String {
             .stdout
     };
 
-    let raw_string_version = String::from_utf8(raw_version).unwrap();
+    let raw_string_version = String::from_utf8(raw_version).expect("unable to convert server version to string");
     let string_version = raw_string_version.replace("BeamMP-Server v", "");
 
-    string_version
+    Ok(string_version)
 }
 
-pub fn get_latest_server_version() -> String {
+pub fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>> {
     let client = reqwest::blocking::Client::builder()
         .user_agent("BeamMP-Server-Manager")
-        .build()
-        .unwrap();
+        .build()?;
     let response = client.get("https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest")
-        .send()
-        .unwrap()
-        .text()
-        .unwrap();
-    let json_response: serde_json::Value = serde_json::from_str(&response).unwrap();
+        .send()?
+        .text()?;
+    let json_response: serde_json::Value = serde_json::from_str(&response)?;
 
     let raw_name = json_response["name"].to_string();
     let stripped_name = raw_name[1..].to_string();
 
-    stripped_name
+    Ok(stripped_name)
 }
 
 fn get_numbers_from_version(version: String) -> Vec<u16> {
