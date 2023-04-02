@@ -40,12 +40,15 @@ fn get_current_server_version() -> io::Result<String> {
 }
 
 pub fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>> {
+    // creating http client
     let client = reqwest::blocking::Client::builder()
         .user_agent("BeamMP-Server-Manager")
         .build()?;
+    // getting latest server release data
     let response = client.get("https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest")
         .send()?
         .text()?;
+    // converting response data to json
     let json_response: serde_json::Value = serde_json::from_str(&response)?;
 
     let raw_name = json_response["name"].to_string();
@@ -55,12 +58,17 @@ pub fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>>
 }
 
 fn get_numbers_from_version(version: String) -> Vec<u16> {
+    // versions look like: x.x.x
     let mut numbers: Vec<u16> = Vec::new();
     let mut current_number = String::new();
     for chr in version.chars() {
+        // numbers in the version string are separated by '.'
+        // so if the character is not '.', it has to be a number
         if chr != '.' {
             current_number.push(chr);
         } else {
+            // if the character is '.', push the current number to the vector
+            // and reset the current number
             numbers.push(current_number.parse::<u16>().unwrap());
             current_number.clear();
             continue;
@@ -75,6 +83,7 @@ fn needs_update(local_version: String, latest_version: String) -> bool {
     let local_numbers = get_numbers_from_version(local_version);
     let latest_numbers = get_numbers_from_version(latest_version);
 
+    // checking if any number in the latest version is greater than the current version
     for (i, num) in local_numbers.iter().enumerate() {
         if latest_numbers[i] > *num {
             needs_update = true;
