@@ -6,34 +6,32 @@ use std::fs;
 use reqwest;
 use serde_json;
 
-// TODO: handle first time setup (no beammp server file exists)
 fn get_current_server_version() -> io::Result<String> {
-    let raw_version = if cfg!(target_os = "windows") {
-        Command::new(r".\BeamMP-Server.exe --version")
+    // executing command to get server version
+    let version_command_result = if cfg!(target_os = "windows") {
+        Command::new(r".\BeamMP-Server.exe")
+            .arg("--version")
             .output()
-            .expect("could not get server version")
-            .stdout
     } else {
-        let mut server_name = String::new();
-        let this_dir = fs::read_dir(std::env::current_dir()?)?;
-        for file in this_dir {
-            let unwrapped_file = file?;
-            if unwrapped_file.file_name().to_str().unwrap().contains("BeamMP-Server-") {
-                server_name = unwrapped_file.file_name()
-                    .to_str()
-                    .unwrap()
-                    .to_string();
-                break;
-            }
-        }
-
-        Command::new(format!("./{} --version", server_name))
+        Command::new("./BeamMP-Server-linux")
+            .arg("--version")
             .output()
-            .expect("could not get server version")
-            .stdout
     };
 
-    let raw_string_version = String::from_utf8(raw_version).expect("unable to convert server version to string");
+    // checking for errors with version command execution
+    let version_command_output = match version_command_result {
+        Ok(output) => output.stdout,
+        Err(e) => {
+            match e.kind() {
+                // if the error is "NotFound", we return the lowest possible version so that the server can be downloaded
+                io::ErrorKind::NotFound => "0.0.0".as_bytes().to_vec(),
+                _ => return Err(e)
+            }
+        }
+    };
+
+    let raw_string_version = String::from_utf8(version_command_output).expect("server version should be string");
+    // string left after replacement is: x.x.x
     let string_version = raw_string_version.replace("BeamMP-Server v", "");
 
     Ok(string_version)
@@ -52,6 +50,7 @@ pub fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>>
     let json_response: serde_json::Value = serde_json::from_str(&response)?;
 
     let raw_name = json_response["name"].to_string();
+    // stripping "v" off of the front of the name (name looks like: vx.x.x)
     let stripped_name = raw_name[1..].to_string();
 
     Ok(stripped_name)
