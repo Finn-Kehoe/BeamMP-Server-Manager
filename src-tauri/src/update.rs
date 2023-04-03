@@ -37,7 +37,7 @@ fn get_current_server_version() -> io::Result<String> {
     Ok(string_version)
 }
 
-pub fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>> {
+fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>> {
     // creating http client
     let client = reqwest::blocking::Client::builder()
         .user_agent("BeamMP-Server-Manager")
@@ -93,7 +93,7 @@ fn needs_update(local_version: String, latest_version: String) -> bool {
     needs_update
 }
 
-pub fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
+fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     // creating http client
     let client = reqwest::blocking::Client::builder()
         .user_agent("BeamMP-Server-Manager")
@@ -148,4 +148,21 @@ pub fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+pub fn auto_update_server() {
+    let current_version = match get_current_server_version() {
+        Ok(version) => version,
+        Err(e) => {eprintln!("Error: {:?}, {}", e.kind(), e.to_string()); return;}
+    };
+    let latest_version = match get_latest_server_version() {
+        Ok(version) => version,
+        Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
+    };
+    if needs_update(current_version, latest_version) {
+        match download_latest_server() {
+            Ok(_) => return,
+            Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
+        };
+    }
 }
