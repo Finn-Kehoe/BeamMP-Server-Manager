@@ -1,9 +1,7 @@
 use std::collections::HashMap;
-use std::io::prelude::*;
-use std::fs;
 
 use crate::mods::{ModList, ModType};
-use crate::util::error::Error;
+use crate::util::{error::Error, config_file};
 
 fn get_internal_map_name(external_name: String, state: tauri::State<ModList>) -> Option<String> {
     let STANDARD_MAPS: HashMap<String, String> = HashMap::from([
@@ -52,29 +50,7 @@ pub fn change_map(map_name: String, state: tauri::State<ModList>) -> Result<(), 
 
     let full_map_path = format!("/levels/{}/info.json", internal_map_name);
 
-    let mut server_config_file_path = std::env::current_dir()?;
-    server_config_file_path.push("ServerConfig.toml");
+    config_file::change_server_config_value(String::from("Map"), full_map_path)?;
 
-    return if server_config_file_path.is_file() {
-        let mut config_contents = String::new();
-        let mut new_config_contents = String::new();
-        let mut file = fs::File::open(&server_config_file_path)?;
-
-        file.read_to_string(&mut config_contents)?;
-
-        for line in config_contents.lines() {
-            if line.starts_with("Map = ") {
-                new_config_contents += &format!("Map = \"{}\"\n", full_map_path);
-            } else {
-                new_config_contents += &format!("{}\n", line);
-            }
-        }
-
-        let mut new_file = fs::File::create(server_config_file_path)?;
-        new_file.write_all(new_config_contents.as_bytes())?;
-
-        Ok(())
-    } else {
-        Err(Error::from(std::io::Error::new(std::io::ErrorKind::NotFound, "server configuration file could not be found")))
-    }
+    Ok(())
 }
