@@ -166,3 +166,25 @@ pub fn auto_update_server() {
         };
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_numbers_from_version() {
+        assert_eq!(get_numbers_from_version(String::from("0.0.0")), vec![0u16; 3]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_get_numbers_from_version() {
+        get_numbers_from_version(String::from("x.0.0"));
+    }
+
+    #[test]
+    fn test_needs_update() {
+        assert!(needs_update(String::from("0.0.0"), String::from("1.1.1")));
+        assert_eq!(needs_update(String::from("0.0.0"), String::from("0.0.0")), false);
+    }
+}
