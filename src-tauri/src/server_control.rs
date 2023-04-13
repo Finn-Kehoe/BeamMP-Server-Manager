@@ -10,17 +10,21 @@ pub struct Server {
 
 impl Server {
     pub fn start() -> Self {
-        let server = if cfg!(target_os = "windows") {
-            Command::new(r".\BeamMP-Server.exe")
-                .spawn()
-                .expect("")
-        } else {
-            Command::new("./BeamMP-Server")
-                .spawn()
-                .expect("")
-        };
+        let server = start_server();
         Self {server: Mutex::new(server)}
     }
+}
+
+pub fn start_server() -> Child {
+    return if cfg!(target_os = "windows") {
+        Command::new(r".\BeamMP-Server.exe")
+            .spawn()
+            .expect("")
+    } else {
+        Command::new("./BeamMP-Server")
+            .spawn()
+            .expect("")
+    };
 }
 
 #[tauri::command]
@@ -38,9 +42,10 @@ pub fn close_server(server: tauri::State<Server>) -> Result<(), error::Error> {
 
 #[tauri::command]
 pub fn restart_server(server: tauri::State<Server>) -> Result<(), error::Error> {
-    close_server(server)?;
+    // TODO: ensure this closes the correct server
+    close_server(server.clone())?;
 
-    server.server = Server::start().server;
+    *server.server.lock().unwrap() = start_server();
 
     Ok(())
 }
