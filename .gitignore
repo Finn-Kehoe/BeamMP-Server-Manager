@@ -26,3 +26,5 @@ dist-ssr
 # Test files
 src-tauri/Resources
 src-tauri/ServerConfig.toml
+src-tauri/BeamMP-Server.exe
+src-tauri/BeamMP-Server
