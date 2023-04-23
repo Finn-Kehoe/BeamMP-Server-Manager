@@ -1,10 +1,22 @@
 use std::process::Command;
-use std::io::Write;
-use std::io;
+use std::io::{self, Write};
 use std::fs;
 
 use reqwest;
 use serde_json;
+use regex::Regex;
+
+fn extract_version_from_string(input: String) -> Option<String> {
+    let re = Regex::new(r"\d+.\d+.\d+").unwrap();
+    let re_output = re.captures(&input).unwrap();
+    return match re_output.get(0) {
+        Some(matched) => {
+            let version = String::from(matched.as_str());
+            Some(version)
+        }
+        None => None,
+    };
+}
 
 fn get_current_server_version() -> io::Result<String> {
     // executing command to get server version
@@ -22,17 +34,16 @@ fn get_current_server_version() -> io::Result<String> {
     let version_command_output = match version_command_result {
         Ok(output) => output.stdout,
         Err(e) => {
-            match e.kind() {
+            return match e.kind() {
                 // if the error is "NotFound", we return the lowest possible version so that the server can be downloaded
-                io::ErrorKind::NotFound => "0.0.0".as_bytes().to_vec(),
-                _ => return Err(e)
+                io::ErrorKind::NotFound => Ok(String::from("0.0.0")),
+                _ => Err(e),
             }
         }
     };
 
     let raw_string_version = String::from_utf8(version_command_output).expect("server version should be string");
-    // string left after replacement is: x.x.x
-    let string_version = raw_string_version.replace("BeamMP-Server v", "");
+    let string_version = extract_version_from_string(raw_string_version).unwrap();
 
     Ok(string_version)
 }
@@ -50,21 +61,29 @@ fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>> {
     let json_response: serde_json::Value = serde_json::from_str(&response)?;
 
     let raw_name = json_response["name"].to_string();
-    // stripping "v" off of the front of the name (name looks like: vx.x.x)
-    let stripped_name = raw_name[1..].to_string();
+    // removing any possible extra characters in name string
+    let processed_name = extract_version_from_string(raw_name).unwrap();
 
-    Ok(stripped_name)
+    Ok(processed_name)
 }
 
 fn get_numbers_from_version(version: String) -> Vec<u16> {
     // versions look like: x.x.x
     let mut numbers: Vec<u16> = Vec::new();
     let mut current_number = String::new();
-    for chr in version.chars() {
+    let mut version_chars = version.chars().peekable();
+    while let Some(chr) = version_chars.next() {
         // numbers in the version string are separated by '.'
         // so if the character is not '.', it has to be a number
         if chr != '.' {
             current_number.push(chr);
+            // peeking at the next value to see if the current character is the last in the string
+            // if it is, we push the current number and break the loop
+            if version_chars.peek().is_none() {
+                numbers.push(current_number.parse::<u16>().unwrap());
+                current_number.clear();
+                break;
+            }
         } else {
             // if the character is '.', push the current number to the vector
             // and reset the current number
@@ -159,9 +178,9 @@ pub fn auto_update_server() {
         Ok(version) => version,
         Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
     };
-    if needs_update(current_version, latest_version) {
+    if needs_update(current_version.clone(), latest_version.clone()) {
         match download_latest_server() {
-            Ok(_) => return,
+            Ok(_) => {println!("Server Updated: {} -> {}", current_version, latest_version); return;},
             Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
         };
     }
@@ -186,5 +205,30 @@ mod tests {
     fn test_needs_update() {
         assert!(needs_update(String::from("0.0.0"), String::from("1.1.1")));
         assert_eq!(needs_update(String::from("0.0.0"), String::from("0.0.0")), false);
+    }
+
+    #[test]
+    fn test_get_current_version() {
+        assert_eq!(get_current_server_version().unwrap(), String::from("3.1.1"))
+    }
+
+    #[test]
+    fn test_get_latest_version() {
+        assert_eq!(get_latest_server_version().unwrap(), String::from("3.1.1"))
+    }
+
+    #[test]
+    fn test_needs_update_real() {
+        assert_eq!(needs_update(get_current_server_version().unwrap(), get_latest_server_version().unwrap()), false)
+    }
+
+    #[test]
+    fn test_auto_update() {
+        auto_update_server();
+    }
+
+    #[test]
+    fn test_extract_version_from_string() {
+        assert_eq!(extract_version_from_string(String::from("\u{1b}[2K\u{1b}[0GBeamMP-Server v3.1.1\r\n\u{1b}[1G\u{1b}[2K\u{1b}[0G\u{1b}[1G")), Some(String::from("3.1.1")))
     }
 }
