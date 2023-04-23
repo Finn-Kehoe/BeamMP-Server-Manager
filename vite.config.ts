@@ -21,6 +21,9 @@ export default defineConfig({
   server: {
     port: 1420,
     strictPort: true,
+    watch: {
+      ignored: ["src-tauri\Resources", "src-tauri\BeamMP-Server.exe", "src-tauri/BeamMP-Server", "src-tauri\Server.log", "src-tauri\ServerConfig.toml"],
+    },
   },
   // to make use of `TAURI_DEBUG` and other env variables
   // https://tauri.studio/v1/api/config#buildconfig.beforedevcommand
