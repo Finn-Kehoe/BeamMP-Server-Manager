@@ -4,7 +4,7 @@ use crate::mods::{ModList, ModType};
 use crate::util::{error::Error, config_file};
 
 fn get_internal_map_name(external_name: String, state: tauri::State<ModList>) -> Option<String> {
-    let STANDARD_MAPS: HashMap<String, String> = HashMap::from([
+    let standard_maps: HashMap<String, String> = HashMap::from([
         ("Gridmap v2".to_string(), "gridmap_v2".to_string()),
         ("Johnson Valley".to_string(), "johnson_valley".to_string()),
         ("Automation Test Track".to_string(), "automation_test_track".to_string()),
@@ -23,7 +23,7 @@ fn get_internal_map_name(external_name: String, state: tauri::State<ModList>) ->
 
     let mut internal_name = String::new();
 
-    match STANDARD_MAPS.get(&external_name) {
+    match standard_maps.get(&external_name) {
         Some(_name) => internal_name = _name.to_string(),
         None => {
             for i in state.mods.iter() {
