@@ -28,3 +28,6 @@ src-tauri/Resources
 src-tauri/ServerConfig.toml
 src-tauri/BeamMP-Server.exe
 src-tauri/BeamMP-Server
+
+# Tauri generated files
+src-tauri/.sentry-native
