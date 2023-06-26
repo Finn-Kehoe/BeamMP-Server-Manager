@@ -1,29 +1,32 @@
+use std::collections::HashMap;
 use std::io::{Result, prelude::*};
 use std::fs;
 
 use zip;
 use serde_json;
+use regex::Regex;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy, serde::Serialize)]
 pub enum ModType {
     Vehicle,
     Map,
     None
 }
 
+#[derive(serde::Serialize, Clone)]
 pub struct Mod {
     pub mod_type: ModType,
-    pub external_name: String,
     pub internal_name: String,
     pub mod_file_name: String,
+    pub details: HashMap<String, String>,
 }
 
 impl Mod {
-    pub fn new(mod_type: ModType, external_name: String, internal_name: String, mod_file_name: String) -> Self {
+    pub fn new(mod_type: ModType, internal_name: String, mod_file_name: String, details: HashMap<String, String>) -> Self {
         if mod_type == ModType::Map {
-            Self {mod_type, external_name, internal_name, mod_file_name}
+            Self {mod_type, internal_name, mod_file_name, details}
         } else {
-            Self {mod_type, external_name: internal_name.clone(), internal_name, mod_file_name}
+            Self {mod_type, internal_name, mod_file_name, details}
         }
     }
 }
@@ -53,12 +56,12 @@ impl ModList {
 }
 
 #[tauri::command]
-pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
-    let mut modded_vehicles: Vec<String> = Vec::new();
+pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
+    let mut modded_vehicles: Vec<Mod> = Vec::new();
 
     for i in state.mods.iter() {
         if i.mod_type == ModType::Vehicle {
-            modded_vehicles.push(i.external_name.clone())
+            modded_vehicles.push(i.clone())
         }
     }
 
@@ -70,12 +73,12 @@ pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<String>>
 }
 
 #[tauri::command]
-pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
-    let mut modded_maps: Vec<String> = Vec::new();
+pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
+    let mut modded_maps: Vec<Mod> = Vec::new();
 
     for i in state.mods.iter() {
         if i.mod_type == ModType::Map {
-            modded_maps.push(i.external_name.clone())
+            modded_maps.push(i.clone())
         }
     }
 
@@ -86,16 +89,18 @@ pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<String>> {
     }
 }
 
+// TODO: deactivate and reactivate mods
+
 fn get_list_of_mods() -> Result<Vec<String>> {
-    let mut final_mods_list: Vec<String> = Vec::new();
+    let mut mods_list: Vec<String> = Vec::new();
 
     // getting path to base mods folder
-    let mut mods_path = std::env::current_dir()?.clone();
-    mods_path.push("Resources");
-    mods_path.push("Client");
+    let mut mods_folder_path = std::env::current_dir()?.clone();
+    mods_folder_path.push("Resources");
+    mods_folder_path.push("Client");
 
-    if mods_path.is_dir() {
-        let raw_mods_list = fs::read_dir(mods_path)?;
+    if mods_folder_path.is_dir() {
+        let raw_mods_list = fs::read_dir(mods_folder_path)?;
         for file in raw_mods_list {
             let mod_name = file
                 .unwrap()
@@ -103,90 +108,114 @@ fn get_list_of_mods() -> Result<Vec<String>> {
                 .to_str()
                 .unwrap()
                 .to_string();
-            final_mods_list.push(mod_name)
+            mods_list.push(mod_name)
         }
-        Ok(final_mods_list)
+        Ok(mods_list)
     } else {
         Err(std::io::Error::new(std::io::ErrorKind::NotFound, "path to mods folder does not exist"))
     }
 }
 
-fn get_internal_mod_name(file_path: &str) -> Result<String> {
-    let mut first_slash_found = false;
-    let mut mod_name = String::new();
-    for chr in file_path.chars() {
-        if chr == '/' && first_slash_found == false {
-            first_slash_found = true;
-            continue;
-        }
-        if first_slash_found == true && chr == '/' {
-            break;
-        }
-        if first_slash_found == true && chr != '/' {
-            mod_name.push(chr);
+fn determine_mod_type<'a, T: Iterator<Item = &'a str>>(file_structure: &mut T) -> Option<ModType> {
+    for file in file_structure {
+        // only map mods contain a "levels" folder
+        if file.contains("levels/") {
+            return Some(ModType::Map);
+        // both map and vehicle mods can contain a "vehicles" folder, so find this type by process of elimination
+        } else if file.contains("vehicles/") {
+            return Some(ModType::Vehicle);
         }
     }
-    if mod_name != String::new() {
-        Ok(mod_name)
-    } else {
-        Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "unable to find mod's internal name"))
+    // if neither type is found, the mod is in an incorrect format
+    return None;
+}
+
+fn find_internal_mod_name<'a, T: Iterator<Item = &'a str>>(file_structure: &mut T, mod_type: ModType) -> Option<String> {
+    let mut full_internal_name = "";
+    // "levels/NAME/" is what we are looking for here
+    if mod_type == ModType::Map {
+        match file_structure.find(|&x| x.starts_with("levels/") && x.matches("/").count() == 2) {
+            Some(path) => full_internal_name = path,
+            None => return None,
+        }
+    // "vehicles/NAME/" is what we are looking for here
+    // all vehicle mods have a "common" folder that we don't care about, so we have to exclude that
+    } else if mod_type == ModType::Vehicle {
+        match file_structure.find(|&x| x.starts_with("vehicles/") && x.matches("/").count() == 2 && !x.contains("commmon")) {
+            Some(path) => full_internal_name = path,
+            None => return None,
+        }
     }
+
+    let re = Regex::new(r"/(?P<no_slash>.+)/").unwrap();
+    let re_output = re.captures(full_internal_name).unwrap();
+    return match re_output.name("no_slash") {
+        Some(val) => Some(String::from(val.as_str())),
+        None => None,
+    };
+}
+
+fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String, mod_type: ModType) -> Result<HashMap<String, String>> {
+    let mut hashmap: HashMap<String, String> = HashMap::new();
+    let mut info_file = zip_object.by_name(&path)?;
+    let mut string_contents = String::new();
+    info_file.read_to_string(&mut string_contents)?;
+    let json: serde_json::Value = serde_json::from_str(&string_contents).unwrap();
+
+    if mod_type == ModType::Map {
+        hashmap.insert(
+            String::from("title"),
+            json["title"].to_string(),
+        );
+        hashmap.insert(
+            String::from("preview_image"),
+            json["previews"][0].to_string(),
+        );
+        hashmap.insert(
+            String::from("authors"),
+            json["authors"].to_string(),
+        );
+    } else if mod_type == ModType::Vehicle {
+        hashmap.insert(
+            String::from("authors"),
+            json["Author"].to_string(),
+        );
+        hashmap.insert(
+            String::from("brand"),
+            json["Brand"].to_string(),
+        );
+        hashmap.insert(
+            String::from("name"),
+            json["Name"].to_string(),
+        );
+    }
+
+    Ok(hashmap)
+
 }
 
 fn examine_mod(mod_name: String) -> Result<Mod> {
-    let mut internal_name = String::new();
-    let mut external_name = String::new();
-    let mut mod_type = ModType::None;
-
     // getting path to mod (the base directory of mod)
     let mut mod_path = std::env::current_dir()?.clone();
     mod_path.push("Resources");
     mod_path.push("Client");
     mod_path.push(&mod_name);
     
-    let mut pathfinding_zip = zip::ZipArchive::new(fs::File::open(&mod_path)?)?;
-    for file in pathfinding_zip.file_names() {
-        // determining mod type based on internal folder names
-        if mod_type == ModType::None {
-            if file.contains("levels/") {
-                mod_type = ModType::Map;
-            } else if file.contains("vehicles/") && mod_type != ModType::Map {
-                mod_type = ModType::Vehicle;
-            }
+    let mut zip_archive = zip::ZipArchive::new(fs::File::open(&mod_path)?)?;
+    let mut file_structure = zip_archive.file_names();
 
-        }
-        if mod_type == ModType::Map {
-            if file.starts_with("levels/") && file.ends_with("/") && internal_name == "" {
-                internal_name = get_internal_mod_name(file)?;
-            }
-            if internal_name != "" {
-                // creating path to internal "info.json" file
-                let mut info_file_path = String::from("levels/");
-                info_file_path.push_str(&internal_name);
-                info_file_path.push_str("/info.json");
-                
-                // reading "info.json" and converting into json object
-                let mut reading_zip = zip::ZipArchive::new(fs::File::open(&mod_path)?)?;
-                let mut string_json = String::new();
-                reading_zip.by_name(&info_file_path)?.read_to_string(&mut string_json)?;
-                let json: serde_json::Value = serde_json::from_str(&string_json).unwrap();
+    let mod_type = determine_mod_type(&mut file_structure).unwrap();
 
-                external_name = json["title"].to_string();
-                break;
-            }
-        } else if mod_type == ModType::Vehicle {
-            if file.starts_with("vehicles/") && file.ends_with("/") && internal_name == "" {
-                let temp_map_name = get_internal_mod_name(file)?;
-                // there is a "common" folder in every vehicle mod that we don't want
-                if temp_map_name != "common" {
-                    internal_name = temp_map_name;
-                    break;
-                }
-            }
-        } else {
-            continue;
-        }
+    let internal_name = find_internal_mod_name(&mut file_structure, mod_type).unwrap();
+    drop(file_structure);
+
+    let mut info_file_path = String::new();
+    if mod_type == ModType::Map {
+        info_file_path = format!("levels/{}/info.json", &internal_name);
+    } else if mod_type == ModType::Vehicle {
+        info_file_path = format!("vehicles/{}/info.json", &internal_name);
     }
+    let mod_info: HashMap<String, String> = read_info_file(&mut zip_archive, info_file_path, mod_type)?;
 
-    Ok(Mod::new(mod_type, external_name, internal_name, mod_name))
+    Ok(Mod::new(mod_type, internal_name, mod_name, mod_info))
 }
