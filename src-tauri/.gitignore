@@ -2,3 +2,8 @@
 # will have compiled files and executables
 /target/
 
+Resources/**
+BeamMP-Server.exe
+Server.log
+Server.old.log
+ServerConfig.toml
