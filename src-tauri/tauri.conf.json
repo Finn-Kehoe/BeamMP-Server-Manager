@@ -20,7 +20,7 @@
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
+      "category": "RacingGame",
       "copyright": "",
       "deb": {
         "depends": []
@@ -61,9 +61,9 @@
       {
         "fullscreen": false,
         "height": 600,
-        "resizable": true,
+        "resizable": false,
         "title": "BeamMP-Server-Manager",
-        "width": 800
+        "width": 1000
       }
     ]
   }
