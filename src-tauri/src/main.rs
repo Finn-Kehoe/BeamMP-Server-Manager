@@ -20,6 +20,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             mods::get_mod_vehicles,
             mods::get_mod_maps,
+            mods::change_mod_activation,
             map_change::change_map,
             server_control::close_server,
             server_control::restart_server,

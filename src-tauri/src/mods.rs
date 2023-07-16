@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use std::io::{Result, prelude::*};
+use std::collections::HashMap;
+use std::sync::Mutex;
 use std::fs;
 
 use zip;
@@ -16,23 +17,24 @@ pub enum ModType {
 #[derive(serde::Serialize, Clone)]
 pub struct Mod {
     pub mod_type: ModType,
+    pub is_active: bool,
     pub internal_name: String,
-    pub mod_file_name: String,
+    pub file_name: String,
     pub details: HashMap<String, String>,
 }
 
 impl Mod {
-    pub fn new(mod_type: ModType, internal_name: String, mod_file_name: String, details: HashMap<String, String>) -> Self {
-        if mod_type == ModType::Map {
-            Self {mod_type, internal_name, mod_file_name, details}
-        } else {
-            Self {mod_type, internal_name, mod_file_name, details}
-        }
+    pub fn new(mod_type: ModType, is_active: bool, internal_name: String, mod_file_name: String, details: HashMap<String, String>) -> Self {
+        Self {mod_type, is_active, internal_name, file_name: mod_file_name, details}
+    }
+
+    pub fn change_activation(&mut self) {
+        self.is_active = !self.is_active;
     }
 }
 
 pub struct ModList {
-    pub mods: Vec<Mod>,
+    pub mods: Mutex<Vec<Mod>>,
 }
 
 impl ModList {
@@ -40,17 +42,18 @@ impl ModList {
         let mut mods: Vec<Mod> = Vec::new();
         let mod_names = get_list_of_mods().unwrap();
         for _mod in mod_names {
-            mods.push(examine_mod(_mod).unwrap())
+            mods.push(examine_mod(_mod.0, _mod.1).unwrap())
         }
 
-        Self {mods}
+        Self {mods: Mutex::new(mods)}
     }
 
     pub fn refresh(&mut self) {
-        self.mods.clear();
+        let mut mods_vec = self.mods.lock().unwrap();
+        mods_vec.clear();
         let mod_names = get_list_of_mods().unwrap();
         for _mod in mod_names {
-            self.mods.push(examine_mod(_mod).unwrap())
+            mods_vec.push(examine_mod(_mod.0, _mod.1).unwrap())
         }
     }
 }
@@ -59,7 +62,7 @@ impl ModList {
 pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
     let mut modded_vehicles: Vec<Mod> = Vec::new();
 
-    for i in state.mods.iter() {
+    for i in state.mods.lock().unwrap().iter() {
         if i.mod_type == ModType::Vehicle {
             modded_vehicles.push(i.clone())
         }
@@ -76,7 +79,7 @@ pub fn get_mod_vehicles(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
 pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
     let mut modded_maps: Vec<Mod> = Vec::new();
 
-    for i in state.mods.iter() {
+    for i in state.mods.lock().unwrap().iter() {
         if i.mod_type == ModType::Map {
             modded_maps.push(i.clone())
         }
@@ -89,18 +92,44 @@ pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
     }
 }
 
-// TODO: deactivate and reactivate mods
+// TODO: test
+#[tauri::command]
+pub fn change_mod_activation(internal_name: String, state: tauri::State<ModList>) {
+    let mut mod_list = state.mods.lock().unwrap();
+    let mut this_mod: &mut Mod;
+    match mod_list.iter_mut().find(|x| x.internal_name == internal_name) {
+        Some(found_mod) => this_mod = found_mod,
+        None => return,
+    }
 
-fn get_list_of_mods() -> Result<Vec<String>> {
-    let mut mods_list: Vec<String> = Vec::new();
+    let current_dir = std::env::current_dir().unwrap().clone();
 
-    // getting path to base mods folder
-    let mut mods_folder_path = std::env::current_dir()?.clone();
-    mods_folder_path.push("Resources");
-    mods_folder_path.push("Client");
+    let mut active_path = current_dir.clone();
+    active_path.push(format!("Resources/Client/{}", &this_mod.file_name));
 
-    if mods_folder_path.is_dir() {
-        let raw_mods_list = fs::read_dir(mods_folder_path)?;
+    let mut inactive_path = current_dir.clone();
+    inactive_path.push(format!("Resources/Inactive/{}", &this_mod.file_name));
+
+    if this_mod.is_active {
+        // moving mod from active directory to inactive directory
+        fs::rename(active_path, inactive_path).unwrap();
+    } else {
+        // moving mod from inactive directory to active directory
+        fs::rename(inactive_path, active_path).unwrap();
+    }
+    this_mod.change_activation();
+}
+
+fn get_list_of_mods() -> Result<HashMap<String, bool>> {
+    let mut mods_list: HashMap<String, bool> = HashMap::new(); // mod name, active status
+
+    // getting path to active mods folder (./Resources/Client)
+    let mut active_mods_path = std::env::current_dir()?.clone();
+    active_mods_path.push("Resources");
+    active_mods_path.push("Client");
+
+    if active_mods_path.is_dir() {
+        let raw_mods_list = fs::read_dir(active_mods_path)?;
         for file in raw_mods_list {
             let mod_name = file
                 .unwrap()
@@ -108,12 +137,34 @@ fn get_list_of_mods() -> Result<Vec<String>> {
                 .to_str()
                 .unwrap()
                 .to_string();
-            mods_list.push(mod_name)
+            mods_list.insert(mod_name, true);
         }
-        Ok(mods_list)
     } else {
-        Err(std::io::Error::new(std::io::ErrorKind::NotFound, "path to mods folder does not exist"))
+       return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "path to mods folder does not exist"));
     }
+
+    // getting path to inactive mods folder (./Resources/Inactive)
+    let mut inactive_mods_path = std::env::current_dir()?.clone();
+    inactive_mods_path.push("Resources");
+    inactive_mods_path.push("Inactive");
+
+    if inactive_mods_path.is_dir() {
+        let raw_mods_list = fs::read_dir(inactive_mods_path)?;
+        for file in raw_mods_list {
+            let mod_name = file
+                .unwrap()
+                .file_name()
+                .to_str()
+                .unwrap()
+                .to_string();
+            mods_list.insert(mod_name, false);
+        }
+    } else {
+        // this folder does not exist in the regular configuration of the BeamMP Server, so if it does not already exist, we create it
+        fs::create_dir(inactive_mods_path)?;
+    }
+
+    Ok(mods_list)
 }
 
 fn determine_mod_type<'a, T: Iterator<Item = &'a str>>(file_structure: &mut T) -> Option<ModType> {
@@ -147,6 +198,7 @@ fn find_internal_mod_name<'a, T: Iterator<Item = &'a str>>(file_structure: &mut 
         }
     }
 
+    // capturing group is used so only characters in-between slashes are captured
     let re = Regex::new(r"/(?P<no_slash>.+)/").unwrap();
     let re_output = re.captures(full_internal_name).unwrap();
     return match re_output.name("no_slash") {
@@ -169,7 +221,7 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String,
         );
         hashmap.insert(
             String::from("preview_image"),
-            json["previews"][0].to_string(),
+            json["previews"].as_array().unwrap()[0].to_string(),
         );
         hashmap.insert(
             String::from("authors"),
@@ -194,11 +246,14 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String,
 
 }
 
-fn examine_mod(mod_name: String) -> Result<Mod> {
-    // getting path to mod (the base directory of mod)
+fn examine_mod(mod_name: String, is_active: bool) -> Result<Mod> {
     let mut mod_path = std::env::current_dir()?.clone();
     mod_path.push("Resources");
-    mod_path.push("Client");
+    if is_active {
+        mod_path.push("Client");
+    } else {
+        mod_path.push("Inactive");
+    }
     mod_path.push(&mod_name);
     
     let mut zip_archive = zip::ZipArchive::new(fs::File::open(&mod_path)?)?;
@@ -207,6 +262,7 @@ fn examine_mod(mod_name: String) -> Result<Mod> {
     let mod_type = determine_mod_type(&mut file_structure).unwrap();
 
     let internal_name = find_internal_mod_name(&mut file_structure, mod_type).unwrap();
+    // file_structure is dropped so we can reference the ZipArchive object elsewhere
     drop(file_structure);
 
     let mut info_file_path = String::new();
@@ -217,5 +273,5 @@ fn examine_mod(mod_name: String) -> Result<Mod> {
     }
     let mod_info: HashMap<String, String> = read_info_file(&mut zip_archive, info_file_path, mod_type)?;
 
-    Ok(Mod::new(mod_type, internal_name, mod_name, mod_info))
+    Ok(Mod::new(mod_type, is_active, internal_name, mod_name, mod_info))
 }
