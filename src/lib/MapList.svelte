@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/tauri"
+    import { invoke } from "@tauri-apps/api/tauri";
+    import type { Mod } from "./mod";
+    import MapListItem from "./MapListItem.svelte";
 
     let maps = [
         "Gridmap v2",
@@ -16,17 +18,23 @@
         "West Coast, USA",
         "ETK Driver Experience Center",
         "Derby Arenas"
-    ]
+    ];
+
+    let mod_maps: Mod[] = [];
 
     async function getModMaps() {
-        let moddedMaps: string[]
         await invoke("get_mod_maps")
-            .then((_map: string[]) => moddedMaps = _map)
-            .catch((_) => moddedMaps = [""])
-        moddedMaps.forEach(map => {
-            maps.push(map)
-        })
+            .then((_map: Mod[]) => mod_maps = _map)
+            .catch((_) => mod_maps = []);
     }
 
-    getModMaps()
+    getModMaps();
 </script>
+
+<div>
+    <ul>
+        {#each mod_maps as item}
+            <li><svelte:component this={MapListItem} modObject={item}/></li>
+        {/each}
+    </ul>
+</div>
