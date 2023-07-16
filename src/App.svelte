@@ -1,39 +1,33 @@
 <script lang="ts">
-  import Greet from './lib/Greet.svelte'
+  import ServerStatusBar from "./lib/ServerStatusBar.svelte";
+  import MapList from "./lib/MapList.svelte";
+  import ModList from "./lib/ModList.svelte";
 </script>
 
 <main class="container">
-  <h1>Welcome to Tauri!</h1>
-
-  <div class="row">
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-    </a>
+  <div class="server-status-bar">
+    <ServerStatusBar />
   </div>
 
-  <p>
-    Click on the Tauri, Vite, and Svelte logos to learn more.
-  </p>
-
-  <div class="row">
-    <Greet />
+  <div class="main-content">
+    <div class="content-lists">
+      <div class="mod-list">
+        <ModList />
+      </div>
+      <div class="map-list">
+        <MapList />
+      </div>
+    </div>
   </div>
-
-
 </main>
 
 <style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
+  .main-content {
+    display: flex;
   }
 
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
+  .content-lists {
+    display: flex;
+    padding: 15px;
   }
 </style>
