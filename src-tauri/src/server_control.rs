@@ -1,5 +1,5 @@
 use std::process::{Command, Child};
-use std::io::{Error, ErrorKind};
+use std::io::ErrorKind;
 use std::sync::Mutex;
 
 use crate::util::error;
@@ -34,7 +34,7 @@ pub fn close_server(server: tauri::State<Server>) -> Result<(), error::Error> {
         Err(e) => {
             match e.kind() {
                 ErrorKind::InvalidInput => Ok(()),
-                _ => Err(error::Error::from(Error::new(ErrorKind::Other, "unable to close server")))
+                _ => Err(error::Error::from(e))
             }
         }
     }
