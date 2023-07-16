@@ -8,7 +8,7 @@ use regex::Regex;
 
 fn extract_version_from_string(input: String) -> Option<String> {
     let re = Regex::new(r"\d+.\d+.\d+").unwrap();
-    let re_output = re.captures(&input).unwrap();
+    let re_output = re.captures(&input)?;
     return match re_output.get(0) {
         Some(matched) => {
             let version = String::from(matched.as_str());
