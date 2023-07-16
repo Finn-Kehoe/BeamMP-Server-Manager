@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::mods::{ModList, ModType};
 use crate::util::{error::Error, config_file};
 
+// TODO: update this to take in an internal name and find map using that
 fn get_internal_map_name(external_name: String, state: tauri::State<ModList>) -> Option<String> {
     let standard_maps: HashMap<String, String> = HashMap::from([
         ("Gridmap v2".to_string(), "gridmap_v2".to_string()),
@@ -26,8 +27,8 @@ fn get_internal_map_name(external_name: String, state: tauri::State<ModList>) ->
     match standard_maps.get(&external_name) {
         Some(_name) => internal_name = _name.to_string(),
         None => {
-            for i in state.mods.iter() {
-                if external_name == i.external_name && i.mod_type == ModType::Map {
+            for i in state.mods.lock().unwrap().iter() {
+                if &external_name == i.details.get(&String::from("title")).unwrap() && i.mod_type == ModType::Map {
                     internal_name = i.internal_name.clone();
                     break;
                 }
