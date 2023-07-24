@@ -13,7 +13,6 @@ mod server_control;
 
 fn main() {
     // update::auto_update_server();
-    // TODO: have beammp server shutdown with app
     tauri::Builder::default()
         .manage(server_control::Server::start())
         .manage(mods::ModList::init())
@@ -24,6 +23,8 @@ fn main() {
             map_change::change_map,
             server_control::close_server,
             server_control::restart_server,
+            util::config_file::has_authkey,
+            util::config_file::add_authkey,
         ])
         .build(tauri::generate_context!())
         .expect("error building tauri app")
