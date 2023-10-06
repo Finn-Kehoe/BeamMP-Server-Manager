@@ -11,7 +11,6 @@ use regex::Regex;
 pub enum ModType {
     Vehicle,
     Map,
-    None
 }
 
 #[derive(serde::Serialize, Clone)]
