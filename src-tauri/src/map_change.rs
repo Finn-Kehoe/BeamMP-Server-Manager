@@ -55,3 +55,11 @@ pub fn change_map(map_name: String, state: tauri::State<ModList>) -> Result<(), 
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn get_current_map() -> Result<String, Error> {
+    return match config_file::get_server_config_value(String::from("Map")) {
+        Ok(val) => Ok(String::from(val.as_str().unwrap())),
+        Err(e) => Err(Error::from(e)),     
+    }
+}

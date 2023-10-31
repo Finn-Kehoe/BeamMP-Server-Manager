@@ -21,6 +21,7 @@ fn main() {
             mods::get_mod_maps,
             mods::change_mod_activation,
             map_change::change_map,
+            map_change::get_current_map,
             server_control::close_server,
             server_control::restart_server,
             util::config_file::has_authkey,
