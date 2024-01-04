@@ -115,7 +115,7 @@ fn needs_update(local_version: String, latest_version: String) -> bool {
 fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     // creating http client
     let client = reqwest::blocking::Client::builder()
-        .user_agent("BeamMP-Server-Manager")
+        .user_agent("BeamMP-Server-Manager") // user agent is required for github api
         .build()?;
     // getting latest server release data
     let full_release = client.get("https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest")
@@ -209,12 +209,12 @@ mod tests {
 
     #[test]
     fn test_get_current_version() {
-        assert_eq!(get_current_server_version().unwrap(), String::from("3.1.1"))
+        assert_eq!(get_current_server_version().unwrap(), String::from("3.2.1"))
     }
 
     #[test]
     fn test_get_latest_version() {
-        assert_eq!(get_latest_server_version().unwrap(), String::from("3.1.1"))
+        assert_eq!(get_latest_server_version().unwrap(), String::from("3.2.1"))
     }
 
     #[test]
@@ -229,6 +229,6 @@ mod tests {
 
     #[test]
     fn test_extract_version_from_string() {
-        assert_eq!(extract_version_from_string(String::from("\u{1b}[2K\u{1b}[0GBeamMP-Server v3.1.1\r\n\u{1b}[1G\u{1b}[2K\u{1b}[0G\u{1b}[1G")), Some(String::from("3.1.1")))
+        assert_eq!(extract_version_from_string(String::from("\u{1b}[2K\u{1b}[0GBeamMP-Server v3.1.1\r\n\u{1b}[1G\u{1b}[2K\u{1b}[0G\u{1b}[1G")), Some(String::from("3.2.1")))
     }
 }
