@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use regex::Regex;
+
 use crate::mods::{ModList, ModType};
 use crate::util::{error::Error, config_file};
 
@@ -58,8 +60,16 @@ pub fn change_map(map_name: String, state: tauri::State<ModList>) -> Result<(), 
 
 #[tauri::command]
 pub fn get_current_map() -> Result<String, Error> {
-    return match config_file::get_server_config_value(String::from("Map")) {
-        Ok(val) => Ok(String::from(val.as_str().unwrap())),
-        Err(e) => Err(Error::from(e)),     
-    }
+    let full_string: String;
+    match config_file::get_server_config_value(String::from("Map")) {
+        Ok(val) => full_string = String::from(val.as_str().unwrap()),
+        Err(e) => return Err(Error::from(e)),     
+    };
+
+    let re = Regex::new(r"/levels/(?P<map>[^/]+)/info\.json").unwrap();
+    let re_output = re.captures(&full_string).unwrap();
+    return match re_output.name("map") {
+        Some(val) => Ok(String::from(val.as_str())),
+        None => Err(Error::from(std::io::Error::new(std::io::ErrorKind::NotFound, "map name not found"))),
+    };
 }
