@@ -5,24 +5,21 @@
     export let modObject: Mod;
     let isActive = modObject.is_active;
 
-    async function change_activation(internal_name: string) {
-        await invoke("change_mod_activation", {
-            internal_name: internal_name,
-        }).catch((e) => {
-            console.log("Error changing activation state for mod: ", e);
-        });
+    async function changeActivation(internal_name: string) {
+        console.log("activation changed")
+        await invoke("change_mod_activation", { internalName: internal_name })
+        .catch((e) => { console.log("Error changing activation state for mod: ", e); });
     }
 
-    $: isActive && change_activation(modObject.internal_name);
+    $: isActive, changeActivation(modObject.internal_name);
     
 </script>
 
 <li>
     <div class="main-body">
         <div class="details">
-            <span class="internal-name">{modObject.internal_name}</span>
-            <br />
-            <span class="car-name">{modObject.details["brand"]} {modObject.details["name"]}</span>
+            <p class="internal-name">{modObject.internal_name}</p>
+            <p class="car-name">{modObject.details["brand"]} {modObject.details["name"]}</p>
         </div>
         <div class="action-buttons">
             <label class="on-off switch">
@@ -46,23 +43,29 @@
 
 <style>
     .main-body {
-        height: 100px;
-        width: 300px;
-        border-style: solid;
-        border-width: medium;
+        background-color: #2b2b2b;
+        height: 6rem;
+        width: 20rem;
+        border-radius: 8px;
         display: flex;
     }
     .details {
         padding: 0.6em;
     }
     .action-buttons {
-        height: 30px;
-        width: 30px;
+        margin-left: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    .delete {
+        margin-top: auto;
+        justify-self: flex-end;
+        padding: 0% 1% 1% 0%;
     }
     .delete.button svg {
-        color: white;
-        height: 30px;
-        width: 30px;
+        color: inherit;
+        height: 50%;
+        width: 2em;
     }
     .delete.button:hover, .delete.button svg:hover {
         color: rgb(252, 77, 77);
