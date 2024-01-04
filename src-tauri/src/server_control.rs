@@ -4,6 +4,13 @@ use std::sync::Mutex;
 
 use crate::util::error;
 
+#[derive(serde::Serialize)]
+pub enum ServerStatus {
+    Stopped,
+    Starting,
+    Running,
+}
+
 pub struct Server {
     pub server: Mutex<Child>
 }
@@ -48,4 +55,10 @@ pub fn restart_server(server: tauri::State<Server>) -> Result<(), error::Error> 
     *server.server.lock().unwrap() = start_server();
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus, error::Error> {
+    // TODO: implement!
+    Ok(ServerStatus::Stopped)
 }
