@@ -1,0 +1,5 @@
+Resources/**
+BeamMP-Server.exe
+Server.log
+Server.old.log
+ServerConfig.toml
