@@ -1,14 +1,22 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api/tauri";
     import type { Mod } from "./mod";
 
     export let modObject: Mod;
     let isActive = modObject.is_active;
+    let hasLoaded = false;
+
+    onMount(() => {
+        hasLoaded = true;
+    })
 
     async function changeActivation(internal_name: string) {
-        console.log("activation changed")
-        await invoke("change_mod_activation", { internalName: internal_name })
-        .catch((e) => { console.log("Error changing activation state for mod: ", e); });
+        if (hasLoaded) {
+            await invoke("change_mod_activation", { internalName: internal_name })
+            .catch((e) => { console.log("Error changing activation state for mod: ", e); });
+
+        }
     }
 
     $: isActive, changeActivation(modObject.internal_name);
