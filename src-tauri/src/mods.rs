@@ -119,6 +119,30 @@ pub fn change_mod_activation(internal_name: String, state: tauri::State<ModList>
     this_mod.change_activation();
 }
 
+#[tauri::command]
+pub fn delete_mod(internal_name: String, state: tauri::State<ModList>) {
+    let mut mod_list = state.mods.lock().unwrap();
+    let mut this_mod: &mut Mod;
+    match mod_list.iter_mut().find(|x| x.internal_name == internal_name) {
+        Some(found_mod) => this_mod = found_mod,
+        None => return,
+    }
+
+    let current_dir = std::env::current_dir().unwrap().clone();
+
+    let mut active_path = current_dir.clone();
+    active_path.push(format!("Resources/Client/{}", &this_mod.file_name));
+
+    let mut inactive_path = current_dir.clone();
+    inactive_path.push(format!("Resources/Inactive/{}", &this_mod.file_name));
+
+    if this_mod.is_active {
+        fs::remove_file(active_path).unwrap();
+    } else {
+        fs::remove_file(inactive_path).unwrap();
+    }
+}
+
 fn get_list_of_mods() -> Result<HashMap<String, bool>> {
     let mut mods_list: HashMap<String, bool> = HashMap::new(); // mod name, active status
 
