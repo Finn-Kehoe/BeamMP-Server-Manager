@@ -20,10 +20,13 @@ fn main() {
             mods::get_mod_vehicles,
             mods::get_mod_maps,
             mods::change_mod_activation,
+            mods::delete_mod,
             map_change::change_map,
             map_change::get_current_map,
+            server_control::start_server,
             server_control::close_server,
             server_control::restart_server,
+            server_control::check_server_status,
             util::config_file::has_authkey,
             util::config_file::add_authkey,
         ])
