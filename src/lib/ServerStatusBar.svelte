@@ -1,5 +1,6 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
+    import { onMount } from "svelte";
 
     enum ServerStatus {
         Stopped = "Stopped",
@@ -7,10 +8,46 @@
         Running = "Running",
     };
 
-    // TODO: implement onMount loop?
+    onMount(() => {
+        async function updateServerStatus() {
+            await invoke("check_server_status")
+                .then((status: ServerStatus) => currentServerStatus = status)
+                .catch((_) => currentServerStatus = ServerStatus.Stopped);
 
-    // actual value of controlButtonClicked doesn't matter, but the value changing does
-    let controlButtonClicked = false;
+            switch (currentServerStatus) {
+                case ServerStatus.Stopped:
+                    statusColor = "#c61824"; // red
+                    // if server is off, we don't want to be able to turn it off again
+                    startDisabled = false;
+                    stopDisabled = true;
+                    restartDisabled = true;
+                    break;
+                case ServerStatus.Starting:
+                    statusColor = "#db7100" // orange
+                    // if server is starting, we don't want to be able to turn it on again
+                    startDisabled = true;
+                    stopDisabled = false;
+                    restartDisabled = false;
+                    break;
+                case ServerStatus.Running:
+                    statusColor = "#008b02"; // green
+                    // if server is on, we don't want to be able to turn it on again
+                    startDisabled = true;
+                    stopDisabled = false;
+                    restartDisabled = false;
+                    break;
+                default:
+                    statusColor = "#ffffff";
+                    break;
+            }
+        }
+        // updateServerStatus function runs every 2000ms (2 seconds)
+        const interval = setInterval(updateServerStatus, 2000);
+        updateServerStatus();
+
+        return () => clearInterval(interval);
+    });
+
     let statusColor = "#db7100";
 
     let currentServerStatus: ServerStatus;
@@ -20,57 +57,17 @@
     let restartDisabled = false;
 
     async function startServer() {
-        //await invoke("");
-        controlButtonClicked = !controlButtonClicked;
+        await invoke("start_server");
     }
 
     async function stopServer() {
         await invoke("close_server");
-        controlButtonClicked = !controlButtonClicked;
     }
 
     async function restartServer() {
         await invoke("restart_server");
-        controlButtonClicked = !controlButtonClicked;
     }
 
-    async function checkServerStatus() {
-        await invoke("check_server_status")
-            .then((status: String) => currentServerStatus = ServerStatus[status as keyof typeof ServerStatus])
-            .catch((_) => currentServerStatus = ServerStatus.Stopped);
-    }
-
-    async function updateServerStatus() {
-        await checkServerStatus();
-        switch (currentServerStatus) {
-            case ServerStatus.Stopped:
-                statusColor = "#c61824"; // red
-                // if server is off, we don't want to be able to turn it off again
-                startDisabled = false;
-                stopDisabled = true;
-                restartDisabled = true;
-                break;
-            case ServerStatus.Starting:
-                statusColor = "#db7100" // orange
-                // if server is starting, we don't want to be able to turn it on again
-                startDisabled = true;
-                stopDisabled = false;
-                restartDisabled = false;
-                break;
-            case ServerStatus.Running:
-                statusColor = "#008b02"; // green
-                // if server is on, we don't want to be able to turn it on again
-                startDisabled = true;
-                stopDisabled = false;
-                restartDisabled = false;
-                break;
-            default:
-                statusColor = "#ffffff";
-                break;
-        }
-    }
-
-    $: controlButtonClicked, updateServerStatus();
 </script>
 
 <div class="statusbar">
