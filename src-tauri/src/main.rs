@@ -34,7 +34,15 @@ fn main() {
         .expect("error building tauri app")
         .run(|handle,event| match event {
             tauri::RunEvent::Exit => {
-                server_control::close_server(handle.state::<server_control::Server>()).expect("server should be managed");
+                match server_control::close_server(handle.state::<server_control::Server>()) {
+                    Ok(_) => (),
+                    Err(e) => {
+                        // access denied error means that the server was already closed, so we don't care about it
+                        if !e.to_string().contains("Access is denied") {
+                            panic!("Error closing BeamMP server: {e}");
+                        }
+                    }
+                };
             }
             _ => ()
         });
