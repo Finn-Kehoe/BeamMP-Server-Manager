@@ -84,16 +84,16 @@ pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus,
         return Ok(ServerStatus::Running);
     } else {
         // looking for "[INFO] ALL SYSTEMS STARTED SUCCESSFULLY, EVERYTHING IS OKAY" in server log file
-        let mut config_file_path = std::env::current_dir()?;
-        config_file_path.push("Server.log");
+        let mut log_file_path = std::env::current_dir()?;
+        log_file_path.push("Server.log");
     
-        if config_file_path.is_file() {
-            let mut config_file = std::fs::File::open(&config_file_path)?;
-            let mut config_contents_string = String::new();
-            config_file.read_to_string(&mut config_contents_string)?;
+        if log_file_path.is_file() {
+            let mut log_file = std::fs::File::open(&log_file_path)?;
+            let mut log_contents_string = String::new();
+            log_file.read_to_string(&mut log_contents_string)?;
 
             let re = Regex::new(r"\[INFO\] ALL SYSTEMS STARTED SUCCESSFULLY, EVERYTHING IS OKAY").unwrap();
-            match re.is_match(&config_contents_string) {
+            match re.is_match(&log_contents_string) {
                 true => {
                     *server.startup_is_finished.lock().unwrap() = false;
                     return Ok(ServerStatus::Running);
