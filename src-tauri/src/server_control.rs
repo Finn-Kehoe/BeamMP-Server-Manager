@@ -31,7 +31,7 @@ fn _start_server() -> Child {
             .spawn()
             .expect("")
     } else {
-        Command::new("./BeamMP-Server")
+        Command::new("./BeamMP-Server-linux")
             .spawn()
             .expect("")
     };
@@ -40,6 +40,7 @@ fn _start_server() -> Child {
 #[tauri::command]
 pub fn start_server(server: tauri::State<Server>) -> Result<(), error::Error> {
     *server.server.lock().unwrap() = _start_server();
+    *server.startup_is_finished.lock().unwrap() = false;
 
     Ok(())
 }
@@ -59,10 +60,10 @@ pub fn close_server(server: tauri::State<Server>) -> Result<(), error::Error> {
 
 #[tauri::command]
 pub fn restart_server(server: tauri::State<Server>) -> Result<(), error::Error> {
-    // TODO: ensure this closes the correct server
     close_server(server.clone())?;
 
     *server.server.lock().unwrap() = _start_server();
+    *server.startup_is_finished.lock().unwrap() = false;
 
     Ok(())
 }
@@ -93,13 +94,12 @@ pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus,
             log_file.read_to_string(&mut log_contents_string)?;
 
             let re = Regex::new(r"\[INFO\] ALL SYSTEMS STARTED SUCCESSFULLY, EVERYTHING IS OKAY").unwrap();
-            match re.is_match(&log_contents_string) {
-                true => {
-                    *server.startup_is_finished.lock().unwrap() = false;
-                    return Ok(ServerStatus::Running);
-                },
-                false => return Ok(ServerStatus::Starting),
-            };
+            if re.is_match(&log_contents_string) {
+                *server.startup_is_finished.lock().unwrap() = true;
+                return Ok(ServerStatus::Running);
+            } else {
+                return Ok(ServerStatus::Starting);
+            }
         } else {
             return Ok(ServerStatus::Stopped);
         }
