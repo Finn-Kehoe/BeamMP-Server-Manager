@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api/tauri";
     import type { Mod } from "./mod";
+    import { deleted_mods } from "./stores";
 
     export let modObject: Mod;
     let isActive = modObject.is_active;
@@ -11,15 +12,27 @@
         hasLoaded = true;
     })
 
-    async function changeActivation(internal_name: string) {
+    async function changeActivation() {
         if (hasLoaded) {
-            await invoke("change_mod_activation", { internalName: internal_name })
+            await invoke("change_mod_activation", { internalName: modObject.internal_name })
             .catch((e) => { console.log("Error changing activation state for mod: ", e); });
 
         }
     }
 
-    $: isActive, changeActivation(modObject.internal_name);
+    async function deleteMod() {
+        await invoke("delete_mod", { internalName: modObject.internal_name })
+        .catch((e) => { console.log("Error deleteing mod: ", e); });
+
+        deleted_mods.update((deleted) => {
+            deleted.push(modObject.internal_name);
+            return deleted;
+        });
+
+        // TODO: refresh modlist
+    }
+
+    $: isActive, changeActivation();
     
 </script>
 
@@ -34,7 +47,7 @@
                 <input type="checkbox" bind:checked={isActive}>
                 <span class="slider round"></span>
             </label>
-            <button class="delete button">
+            <button class="delete button" on:click={deleteMod}>
                 <svg
                     style="fill: currentColor;"
                     xmlns="http://www.w3.org/2000/svg"
@@ -57,23 +70,31 @@
         border-radius: 8px;
         display: flex;
     }
+    .main-body:hover {
+        background-color: #313131;
+    }
     .details {
-        padding: 0.6em;
+        padding: 4%;
+        align-self: center;
     }
     .action-buttons {
         margin-left: auto;
         display: flex;
         flex-direction: column;
+        padding: 2%;
     }
     .delete {
         margin-top: auto;
         justify-self: flex-end;
-        padding: 0% 1% 1% 0%;
+        align-self: flex-end;
+        padding: 0%;
+        width: 75%;
+        height: 50%;
     }
     .delete.button svg {
         color: inherit;
-        height: 50%;
-        width: 2em;
+        height: 75%;
+        
     }
     .delete.button:hover, .delete.button svg:hover {
         color: rgb(252, 77, 77);
