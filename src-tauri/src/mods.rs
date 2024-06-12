@@ -240,7 +240,7 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String,
     if mod_type == ModType::Map {
         hashmap.insert(
             String::from("title"),
-            json["title"].to_string(),
+            json["title"].as_str().unwrap().to_string(),
         );
         hashmap.insert(
             String::from("preview_image"),
@@ -248,20 +248,20 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String,
         );
         hashmap.insert(
             String::from("authors"),
-            json["authors"].to_string(),
+            json["authors"].as_str().unwrap().to_string(),
         );
     } else if mod_type == ModType::Vehicle {
         hashmap.insert(
             String::from("authors"),
-            json["Author"].to_string(),
+            json["Author"].as_str().unwrap().to_string(),
         );
         hashmap.insert(
             String::from("brand"),
-            json["Brand"].to_string(),
+            json["Brand"].as_str().unwrap().to_string(),
         );
         hashmap.insert(
             String::from("name"),
-            json["Name"].to_string(),
+            json["Name"].as_str().unwrap().to_string(),
         );
     }
 
