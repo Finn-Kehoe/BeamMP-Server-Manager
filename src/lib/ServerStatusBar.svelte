@@ -41,8 +41,8 @@
                     break;
             }
         }
-        // updateServerStatus function runs every 2000ms (2 seconds)
-        const interval = setInterval(updateServerStatus, 2000);
+        // updateServerStatus function runs every 1000ms (1 second)
+        const interval = setInterval(updateServerStatus, 1000);
         updateServerStatus();
 
         return () => clearInterval(interval);
