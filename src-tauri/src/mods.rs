@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use std::fs;
 
+use crate::util::json;
+
 use zip;
 use serde_json;
 use regex::Regex;
@@ -233,9 +235,16 @@ fn find_internal_mod_name<'a, T: Iterator<Item = &'a str>>(file_structure: &mut 
 fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String, mod_type: ModType) -> Result<HashMap<String, String>> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
     let mut info_file = zip_object.by_name(&path)?;
-    let mut string_contents = String::new();
-    info_file.read_to_string(&mut string_contents)?;
-    let json: serde_json::Value = serde_json::from_str(&string_contents).unwrap();
+    let mut raw_json = String::new();
+    info_file.read_to_string(&mut raw_json)?;
+    // try to get deserialize info json file (json can potentially be incorrectly formatted)
+    let json: serde_json::Value = match serde_json::from_str(&raw_json) {
+        Ok(json) => json,
+        // if deserialization fails, preprocess it and reattempt to deseralize
+        Err(_) => {
+            serde_json::from_str(&json::preprocess_json(raw_json)).unwrap()
+        }
+    };
 
     if mod_type == ModType::Map {
         hashmap.insert(
