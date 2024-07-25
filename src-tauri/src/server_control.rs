@@ -1,5 +1,5 @@
 use std::process::{Command, Child};
-use std::io::{ErrorKind, Read};
+use std::io::ErrorKind;
 use std::sync::Mutex;
 
 use crate::util::error;
@@ -89,9 +89,7 @@ pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus,
         log_file_path.push("Server.log");
     
         if log_file_path.is_file() {
-            let mut log_file = std::fs::File::open(&log_file_path)?;
-            let mut log_contents_string = String::new();
-            log_file.read_to_string(&mut log_contents_string)?;
+            let log_contents_string: String = std::fs::read_to_string(&log_file_path)?;
 
             let re = Regex::new(r"\[INFO\] ALL SYSTEMS STARTED SUCCESSFULLY, EVERYTHING IS OKAY").unwrap();
             if re.is_match(&log_contents_string) {
