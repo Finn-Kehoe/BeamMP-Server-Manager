@@ -3,8 +3,9 @@
     import type { Mod } from "./mod";
     import MapListItem from "./MapListItem.svelte";
     import { onMount } from "svelte";
-    import { current_map } from "./stores";
+    import { current_map, needs_restart } from "./stores";
     import VMapListItem from "./VMapListItem.svelte";
+    import { get } from "svelte/store";
 
     let maps = [
         "Gridmap v2",
@@ -24,6 +25,8 @@
     ];
 
     let mod_maps: Mod[] = [];
+    let lastLoadedMap = "";
+    let mapHasBeenChanged = false;
 
     async function getModMaps() {
         await invoke("get_mod_maps")
@@ -40,7 +43,29 @@
     onMount(() => {
         getModMaps();
         getCurrentMap();
+        lastLoadedMap = get(current_map);
     })
+
+    current_map.subscribe((map) => {
+        // if the selected map is changed to not the loaded one, add to needs_restart
+        if (map !== lastLoadedMap) {
+            if (!mapHasBeenChanged) {
+                needs_restart.update((_needs_restart) => _needs_restart + 1);
+                mapHasBeenChanged = true;
+            }
+        // if the loaded map is reselected, subtract to needs_restart
+        } else {
+            needs_restart.update((_needs_restart) => _needs_restart - 1);
+        }
+    });
+
+    needs_restart.subscribe((_needs_restart) => {
+        // when server is restarted, reset the currently loaded map
+        if (_needs_restart === 0) {
+            lastLoadedMap = get(current_map);
+            mapHasBeenChanged = false;
+        }
+    });
 
     // getModMaps();
 </script>

@@ -2,10 +2,11 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api/tauri";
     import type { Mod } from "./mod";
-    import { deleted_mods } from "./stores";
+    import { deleted_mods, needs_restart } from "./stores";
 
     export let modObject: Mod;
     let isActive = modObject.is_active;
+    let lastLoadedActivation = isActive;
     let hasLoaded = false;
 
     onMount(() => {
@@ -17,6 +18,13 @@
             await invoke("change_mod_activation", { internalName: modObject.internal_name })
             .catch((e) => { console.log("Error changing activation state for mod: ", e); });
 
+            // if the mod activation is changed from previously loaded value, add to needs_restart
+            if (lastLoadedActivation !== isActive) {
+                needs_restart.update((_needs_restart) => _needs_restart + 1);
+            // if it is put back to previously loaded value, subtract from needs_restart
+            } else {
+                needs_restart.update((_needs_restart) => _needs_restart - 1);
+            }
         }
     }
 
@@ -31,6 +39,13 @@
 
         // TODO: refresh modlist
     }
+
+    needs_restart.subscribe((_needs_restart) => {
+        // when server is restarted, reset currently loaded activation state
+        if (_needs_restart === 0) {
+            lastLoadedActivation = isActive;
+        }
+    });
 
     $: isActive, changeActivation();
     
