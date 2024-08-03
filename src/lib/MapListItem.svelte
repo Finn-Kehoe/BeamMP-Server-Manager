@@ -13,7 +13,7 @@
     }
 
     current_map.subscribe((map) => {
-        if (map == modObject.internal_name) {
+        if (map === modObject.internal_name) {
             is_active = true;
         } else {
             is_active = false;
@@ -50,6 +50,9 @@
 </li>
 
 <style>
+    li:not(:last-child) {
+        margin-bottom: 3px;
+    }
     .main-body {
         background-color: #2b2b2b;
         height: 6rem;
@@ -68,11 +71,23 @@
     }
     .details {
         justify-self: center;
+        text-align: left;
+        padding-left: 5%;
+    }
+    .action-button {
+        margin-left: auto;
+        margin-top: auto;
+        padding: 2%;
+    }
+    .delete {
+        padding: 0%;
+        width: 40px;
+        height: 40px;
     }
     .delete.button svg {
+        position: relative;
         color: inherit;
         height: 75%;
-        
     }
     .delete.button:hover, .delete.button svg:hover {
         color: rgb(252, 77, 77);

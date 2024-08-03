@@ -50,9 +50,25 @@
 
 <style>
     ul {
-        border-width: medium;
-        border-style: solid;
-        border-radius: 1rem;
+        height: 25em;
         list-style-type: none;
+        overflow: hidden;
+        overflow-y: scroll;
+        padding-right: 5px;
+        margin-right: -5px;
+    }
+    ::-webkit-scrollbar {
+        background-color: transparent;
+        width: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-clip: padding-box;
+        border: 3px solid transparent;
+        /* width: 7px; */
+        border-radius: 5%;
+        background-color: #383838;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #3d3d3d;
     }
 </style>

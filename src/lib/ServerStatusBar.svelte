@@ -136,17 +136,14 @@
         cursor: pointer;
         background-color: #3d3d3d;
     }
-
     .button:disabled {
         cursor: default !important;
         background-color: #999999;
     }
-
     .flashing {
         border: 1px solid transparent;
         animation: flash 2s linear infinite alternate;
     }
-
     @keyframes flash {
         50% { border-color: #ff7722; }
     }

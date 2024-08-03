@@ -78,6 +78,9 @@
 </li>
 
 <style>
+    li:not(:last-child) {
+        margin-bottom: 3px;
+    }
     .main-body {
         background-color: #2b2b2b;
         height: 6rem;
