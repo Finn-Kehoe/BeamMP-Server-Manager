@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-export const current_map = writable("gridmap_v2"); // default map is gridmap v2
+export const current_map = writable<string>();
 
 export const needs_restart = writable(0); // 0 = no restart necessary, >0 = restart necessary
 
