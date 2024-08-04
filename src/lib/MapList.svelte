@@ -3,7 +3,7 @@
     import type { Mod } from "./mod";
     import MapListItem from "./MapListItem.svelte";
     import { onMount } from "svelte";
-    import { current_map, needs_restart } from "./stores";
+    import { current_map, needs_restart, maplist_has_been_changed } from "./stores";
     import VMapListItem from "./VMapListItem.svelte";
     import { get } from "svelte/store";
 
@@ -28,6 +28,14 @@
         getCurrentMap();
     })
 
+    maplist_has_been_changed.subscribe((hasBeenChanged) => {
+        if (hasBeenChanged) {
+            getModMaps();
+            maplist_has_been_changed.set(false);
+            needs_restart.update((_needs_restart) => _needs_restart + 1);
+        }
+    });
+
     current_map.subscribe((map) => {
         // if the selected map is changed to not the loaded one, add to needs_restart
         if (map !== lastLoadedMap) {
@@ -49,7 +57,6 @@
         }
     });
 
-    // getModMaps();
 </script>
 
 <div>

@@ -1,5 +1,5 @@
 use std::io::{Result, prelude::*};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 use std::fs;
 
@@ -15,7 +15,7 @@ pub enum ModType {
     Map,
 }
 
-#[derive(serde::Serialize, Clone)]
+#[derive(serde::Serialize, Clone, PartialEq)]
 pub struct Mod {
     pub mod_type: ModType,
     pub is_active: bool,
@@ -50,6 +50,21 @@ impl ModList {
     }
 
     pub fn refresh(&mut self) {
+        let stored_mods_vec: Vec<String> = self.mods.lock().unwrap()
+            .iter()
+            .map(|Mod { ref file_name, .. }| file_name)
+            .cloned()
+            .collect();
+        let current_mods_vec = get_list_of_mods().unwrap().keys().cloned().collect::<Vec<String>>();
+
+        let stored_mods_hash: HashSet<String> = HashSet::from_iter(stored_mods_vec.into_iter());
+        let current_mods_hash: HashSet<String> = HashSet::from_iter(current_mods_vec.into_iter());
+
+        let removed_mods = stored_mods_hash.difference(&current_mods_hash).collect::<Vec<&String>>();
+        let added_mods = current_mods_hash.difference(&stored_mods_hash).collect::<Vec<&String>>();
+
+        // TODO: finish implementing
+
         let mut mods_vec = self.mods.lock().unwrap();
         mods_vec.clear();
         let mod_names = get_list_of_mods().unwrap();
@@ -128,8 +143,8 @@ pub fn _change_mod_activation(this_mod: &mut Mod) {
 #[tauri::command]
 pub fn delete_mod(internal_name: String, state: tauri::State<ModList>) {
     let mut mod_list = state.mods.lock().unwrap();
-    let mut this_mod: &mut Mod;
-    match mod_list.iter_mut().find(|x| x.internal_name == internal_name) {
+    let this_mod: &Mod;
+    match mod_list.iter().find(|x| x.internal_name == internal_name) {
         Some(found_mod) => this_mod = found_mod,
         None => return,
     }
@@ -147,6 +162,9 @@ pub fn delete_mod(internal_name: String, state: tauri::State<ModList>) {
     } else {
         fs::remove_file(inactive_path).unwrap();
     }
+
+    let cloned_mod = this_mod.clone();
+    mod_list.retain(|x| *x != cloned_mod);
 }
 
 fn get_list_of_mods() -> Result<HashMap<String, bool>> {

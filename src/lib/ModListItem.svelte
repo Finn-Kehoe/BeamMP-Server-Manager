@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api/tauri";
     import type { Mod } from "./mod";
-    import { deleted_mods, needs_restart } from "./stores";
+    import { modlist_has_been_changed, needs_restart } from "./stores";
 
     export let modObject: Mod;
     let isActive = modObject.is_active;
@@ -32,12 +32,7 @@
         await invoke("delete_mod", { internalName: modObject.internal_name })
         .catch((e) => { console.log("Error deleteing mod: ", e); });
 
-        deleted_mods.update((deleted) => {
-            deleted.push(modObject.internal_name);
-            return deleted;
-        });
-
-        // TODO: refresh modlist
+        modlist_has_been_changed.set(true);
     }
 
     needs_restart.subscribe((_needs_restart) => {
