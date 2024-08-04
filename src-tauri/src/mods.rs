@@ -43,7 +43,7 @@ impl ModList {
         let mut mods: Vec<Mod> = Vec::new();
         let mod_names = get_list_of_mods().unwrap();
         for _mod in mod_names {
-            mods.push(examine_mod(_mod.0, _mod.1).unwrap())
+            mods.push(examine_mod(_mod.0, _mod.1).unwrap());
         }
 
         Self {mods: Mutex::new(mods)}
@@ -93,15 +93,19 @@ pub fn get_mod_maps(state: tauri::State<'_, ModList>) -> Option<Vec<Mod>> {
     }
 }
 
-// TODO: test
 #[tauri::command]
 pub fn change_mod_activation(internal_name: String, state: tauri::State<ModList>) {
     let mut mod_list = state.mods.lock().unwrap();
-    let mut this_mod: &mut Mod;
+    let this_mod: &mut Mod;
     match mod_list.iter_mut().find(|x| x.internal_name == internal_name) {
         Some(found_mod) => this_mod = found_mod,
         None => return,
     }
+
+    _change_mod_activation(this_mod);
+}
+
+pub fn _change_mod_activation(this_mod: &mut Mod) {
 
     let current_dir = std::env::current_dir().unwrap().clone();
 
@@ -237,7 +241,7 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String,
     let mut info_file = zip_object.by_name(&path)?;
     let mut raw_json = String::new();
     info_file.read_to_string(&mut raw_json)?;
-    // try to get deserialize info json file (json can potentially be incorrectly formatted)
+    // try to deserialize info json file (json can potentially be incorrectly formatted)
     let json: serde_json::Value = match serde_json::from_str(&raw_json) {
         Ok(json) => json,
         // if deserialization fails, preprocess it and reattempt to deseralize

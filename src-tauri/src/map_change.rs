@@ -1,11 +1,28 @@
 use regex::Regex;
 
+use crate::mods;
 use crate::util::{error::Error, config_file};
 
 #[tauri::command]
-pub fn change_map(map_name: String) -> Result<(), Error> {
-    let full_map_path = format!("/levels/{}/info.json", map_name);
+pub fn change_map(map_name: String, modlist: tauri::State<mods::ModList>) -> Result<(), Error> {
 
+    for _mod in modlist.mods.lock().unwrap().iter_mut() {
+        if _mod.mod_type == mods::ModType::Map {
+            // if the map we are changing to isn't active, make it active
+            if _mod.internal_name == map_name {
+                if _mod.is_active == false {
+                    mods::_change_mod_activation(_mod);
+                }
+            // if a map that we aren't changing to is active, make it inactive
+            } else {
+                if _mod.is_active == true {
+                    mods::_change_mod_activation(_mod);
+                }
+            }
+        }
+    }
+
+    let full_map_path = format!("/levels/{}/info.json", map_name);
     config_file::change_server_config_value(String::from("Map"), full_map_path, config_file::ConfigTable::General)?;
 
     Ok(())
