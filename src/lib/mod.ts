@@ -1,7 +1,6 @@
 export enum ModType {
-    Vehicle,
-    Map,
-    None
+    Vehicle = "Vehicle",
+    Map = "Map",
 }
 
 export class Mod {

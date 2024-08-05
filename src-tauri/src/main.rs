@@ -21,6 +21,7 @@ fn main() {
             mods::get_mod_maps,
             mods::change_mod_activation,
             mods::delete_mod,
+            mods::add_mod,
             map_change::change_map,
             map_change::get_current_map,
             server_control::start_server,

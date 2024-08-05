@@ -1,9 +1,9 @@
-use std::io::{Result, prelude::*};
+use std::io::{self, prelude::*};
 use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 use std::fs;
 
-use crate::util::json;
+use crate::util::{json, error};
 
 use zip;
 use serde_json;
@@ -167,7 +167,32 @@ pub fn delete_mod(internal_name: String, state: tauri::State<ModList>) {
     mod_list.retain(|x| *x != cloned_mod);
 }
 
-fn get_list_of_mods() -> Result<HashMap<String, bool>> {
+#[tauri::command]
+pub fn add_mod(path: String, state: tauri::State<ModList>) -> Result<ModType, error::Error> {
+    let init_path = std::path::Path::new(&path);
+    let file_name = init_path.file_name().unwrap().to_str().unwrap();
+
+    let mut destination_path = std::env::current_dir()?;
+    destination_path.push(format!("Resources/Client/{}", file_name));
+
+    if init_path.extension().unwrap() == "zip" {
+        fs::rename(init_path, destination_path)?;
+    } else {
+        return Err(error::Error::from(std::io::Error::new(std::io::ErrorKind::InvalidInput, "incorrect file type")));
+    }
+
+    let mut mod_object = examine_mod(String::from(file_name), true)?;
+    let mod_type = mod_object.mod_type;
+    // maps are always inactive unless currently loaded, and a just added mod will never be currently loaded
+    if mod_type == ModType::Map {
+        _change_mod_activation(&mut mod_object);
+    }
+    state.mods.lock().unwrap().push(mod_object);
+
+    Ok(mod_type)
+}
+
+fn get_list_of_mods() -> io::Result<HashMap<String, bool>> {
     let mut mods_list: HashMap<String, bool> = HashMap::new(); // mod name, active status
 
     // getting path to active mods folder (./Resources/Client)
@@ -254,7 +279,7 @@ fn find_internal_mod_name<'a, T: Iterator<Item = &'a str>>(file_structure: &mut 
     };
 }
 
-fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String, mod_type: ModType) -> Result<HashMap<String, String>> {
+fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String, mod_type: ModType) -> io::Result<HashMap<String, String>> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
     let mut info_file = zip_object.by_name(&path)?;
     let mut raw_json = String::new();
@@ -300,7 +325,7 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String,
 
 }
 
-fn examine_mod(mod_name: String, is_active: bool) -> Result<Mod> {
+fn examine_mod(mod_name: String, is_active: bool) -> io::Result<Mod> {
     let mut mod_path = std::env::current_dir()?.clone();
     mod_path.push("Resources");
     if is_active {

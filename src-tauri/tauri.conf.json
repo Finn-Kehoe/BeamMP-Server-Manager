@@ -63,7 +63,8 @@
         "height": 600,
         "resizable": false,
         "title": "BeamMP-Server-Manager",
-        "width": 1000
+        "width": 1000,
+        "fileDropEnabled": true
       }
     ]
   }
