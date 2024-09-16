@@ -1,19 +1,19 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
-    import type { Mod } from "./mod";
+    import type { MapMod } from "./mod";
     import MapListItem from "./MapListItem.svelte";
     import { onMount } from "svelte";
     import { current_map, needs_restart, maplist_has_been_changed } from "./stores";
     import VMapListItem from "./VMapListItem.svelte";
     import { get } from "svelte/store";
 
-    let mod_maps: Mod[] = [];
+    let mod_maps: MapMod[] = [];
     let lastLoadedMap = "";
     let mapHasBeenChanged = false;
 
     async function getModMaps() {
         await invoke("get_mod_maps")
-            .then((_map: Mod[]) => mod_maps = _map)
+            .then((_map: MapMod[]) => mod_maps = _map)
             .catch((_) => mod_maps = []);
     }
 

@@ -4,22 +4,19 @@ use crate::mods;
 use crate::util::{error::Error, config_file};
 
 #[tauri::command]
-pub fn change_map(map_name: String, modlist: tauri::State<mods::ModList>) -> Result<(), Error> {
-
-    for _mod in modlist.mods.lock().unwrap().iter_mut() {
-        if _mod.mod_type == mods::ModType::Map {
+pub fn change_map(map_name: String, maplist: tauri::State<mods::map::MapList>) -> Result<(), Error> {
+    for _map in maplist.maps.lock().unwrap().iter_mut() {
             // if the map we are changing to isn't active, make it active
-            if _mod.internal_name == map_name {
-                if _mod.is_active == false {
-                    mods::_change_mod_activation(_mod);
+            if _map.internal_name == map_name {
+                if _map.is_active == false {
+                    mods::generic::_change_mod_activation(_map);
                 }
             // if a map that we aren't changing to is active, make it inactive
             } else {
-                if _mod.is_active == true {
-                    mods::_change_mod_activation(_mod);
+                if _map.is_active == true {
+                    mods::generic::_change_mod_activation(_map);
                 }
             }
-        }
     }
 
     let full_map_path = format!("/levels/{}/info.json", map_name);

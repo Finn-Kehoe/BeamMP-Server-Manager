@@ -5,7 +5,7 @@
     export let internal_name: string;
     export let external_name: string;
 
-    let is_active = false;
+    let isActive = false;
 
     async function setAsCurrentMap() {
         await invoke("change_map", { mapName: internal_name });
@@ -14,15 +14,15 @@
 
     current_map.subscribe((map) => {
         if (map === internal_name) {
-            is_active = true;
+            isActive = true;
         } else {
-            is_active = false;
+            isActive = false;
         }
     });
 </script>
 
 <li>
-    <div class="main-body" on:dblclick={setAsCurrentMap} class:active={is_active}>
+    <div class="main-body" on:dblclick={setAsCurrentMap} class:active={isActive}>
         <div class="details">
             <p class="map-name">{external_name}</p>
             <p class="internal-name">{internal_name}</p>
@@ -49,6 +49,9 @@
         outline-style: solid !important;
         outline-width: 3px;
         outline-color: #ff7722;
+    }
+    .active:first-child {
+        margin-top: 3px;
     }
     .details {
         justify-self: center;

@@ -1,15 +1,15 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri"
-    import type { Mod } from "./mod";
+    import type { ContentMod } from "./mod";
     import ModListItem from "./ModListItem.svelte";
     import { modlist_has_been_changed, needs_restart } from "./stores";
     import { onMount } from "svelte";
 
-    let mods: Mod[] = [];
+    let mods: ContentMod[] = [];
 
     async function getMods() {
-        await invoke("get_mod_vehicles")
-            .then((vehicles: Mod[]) => mods = vehicles)
+        await invoke("get_mod_content")
+            .then((content: ContentMod[]) => mods = content)
             .catch((_) => mods = []);
     }
 

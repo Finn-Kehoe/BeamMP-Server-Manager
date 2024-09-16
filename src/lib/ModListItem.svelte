@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api/tauri";
-    import type { Mod } from "./mod";
+    import type { ContentMod } from "./mod";
     import { modlist_has_been_changed, needs_restart } from "./stores";
 
-    export let modObject: Mod;
+    export let modObject: ContentMod;
     let isActive = modObject.is_active;
     let lastLoadedActivation = isActive;
     let hasLoaded = false;
@@ -15,7 +15,7 @@
 
     async function changeActivation() {
         if (hasLoaded) {
-            await invoke("change_mod_activation", { internalName: modObject.internal_name })
+            await invoke("change_mod_activation", { fileName: modObject.file_name }) // TODO: FIX
             .catch((e) => { console.log("Error changing activation state for mod: ", e); });
 
             // if the mod activation is changed from previously loaded value, add to needs_restart
@@ -29,7 +29,7 @@
     }
 
     async function deleteMod() {
-        await invoke("delete_mod", { internalName: modObject.internal_name })
+        await invoke("delete_mod", { fileName: modObject.file_name }) // TODO: FIX
         .catch((e) => { console.log("Error deleteing mod: ", e); });
 
         modlist_has_been_changed.set(true);
@@ -49,8 +49,8 @@
 <li>
     <div class="main-body">
         <div class="details">
-            <p class="internal-name">{modObject.internal_name}</p>
-            <p class="car-name">{modObject.details["brand"]} {modObject.details["name"]}</p>
+            <p class="internal-name">{modObject.file_name}</p>
+            <p class="car-name">{modObject.inner_content[0].brand} {modObject.inner_content[0].name}</p>
         </div>
         <div class="action-buttons">
             <label class="on-off switch">

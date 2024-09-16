@@ -5,23 +5,30 @@
 
 use tauri::Manager;
 
-mod mods;
+mod _mods;
 mod map_change;
 mod update;
 mod util;
 mod server_control;
+mod mods;
 
 fn main() {
     // update::auto_update_server();
     tauri::Builder::default()
         .manage(server_control::Server::start())
-        .manage(mods::ModList::init())
+        .manage(mods::content::ContentList::empty_init())
+        .manage(mods::map::MapList::empty_init())
+        .setup(|app| {
+            let handle = app.handle();
+            mods::generic::examine_mods(handle.state::<mods::content::ContentList>(), handle.state::<mods::map::MapList>());
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
-            mods::get_mod_vehicles,
-            mods::get_mod_maps,
-            mods::change_mod_activation,
-            mods::delete_mod,
-            mods::add_mod,
+            mods::map::get_mod_maps,
+            mods::content::get_mod_content,
+            mods::generic::change_mod_activation,
+            mods::generic::delete_mod,
+            mods::generic::add_mod,
             map_change::change_map,
             map_change::get_current_map,
             server_control::start_server,
