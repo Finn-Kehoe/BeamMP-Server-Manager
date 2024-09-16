@@ -70,6 +70,7 @@ pub fn restart_server(server: tauri::State<Server>) -> Result<(), error::Error> 
 
 #[tauri::command]
 pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus, error::Error> {
+    // attempt to collect server's process exit status
     match server.server.lock().unwrap().try_wait() {
         // if exit status is able to be collected then server has stopped
         Ok(Some(_)) => return Ok(ServerStatus::Stopped),
