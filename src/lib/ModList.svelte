@@ -2,6 +2,7 @@
     import { invoke } from "@tauri-apps/api/tauri"
     import type { ContentMod } from "./mod";
     import ModListItem from "./ModListItem.svelte";
+    import MultiModListItem from "./MultiModListItem.svelte";
     import { modlist_has_been_changed, needs_restart } from "./stores";
     import { onMount } from "svelte";
 
@@ -30,7 +31,11 @@
 <div>
     <ul class="list-body">
         {#each mods as item}
-            <svelte:component this={ModListItem} modObject={item}/>
+            {#if item.inner_content.length === 1}
+                <svelte:component this={ModListItem} modObject={item}/>
+            {:else}
+                <svelte:component this={MultiModListItem} modObject={item}/>
+            {/if}
         {/each}
     </ul>
 </div>

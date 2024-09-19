@@ -8,6 +8,7 @@
     let isActive = modObject.is_active;
     let lastLoadedActivation = isActive;
     let hasLoaded = false;
+    let showExpanded = false;
 
     onMount(() => {
         hasLoaded = true;
@@ -49,8 +50,18 @@
 <li>
     <div class="main-body">
         <div class="details">
-            <p class="internal-name">{modObject.inner_content[0].internal_name}</p>
-            <p class="car-name">{modObject.inner_content[0].brand} {modObject.inner_content[0].name}</p>
+            <button class="multi-toggle" on:click={() => showExpanded = !showExpanded}>
+                <svg class:flipped={!showExpanded} 
+                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.29289 8.79289C6.68342 8.40237 7.31658 8.40237 7.70711 8.79289L12 13.0858L16.2929 8.79289C16.6834 8.40237 17.3166 8.40237 17.7071 8.79289C18.0976 9.18342 18.0976 9.81658 17.7071 10.2071L12.7071 15.2071C12.3166 15.5976 11.6834 15.5976 11.2929 15.2071L6.29289 10.2071C5.90237 9.81658 5.90237 9.18342 6.29289 8.79289Z" fill="#ffffff">
+                        </path> 
+                    </g>
+                </svg>
+            </button>
+            <p class="mod-name">{modObject.file_name}</p>
         </div>
         <div class="action-buttons">
             <label class="on-off switch">
@@ -70,6 +81,16 @@
             </button>
         </div>
     </div>
+    <div class="expanded-body">
+        {#if showExpanded}
+            {#each modObject.inner_content as thisInner}
+                <div class="expanded-details">
+                    <p class="internal-name">{thisInner.internal_name}</p>
+                    <p class="car-name">{thisInner.brand} {thisInner.name}</p>
+                </div>
+            {/each}
+        {/if}
+    </div>
 </li>
 
 <style>
@@ -87,8 +108,21 @@
         background-color: #313131;
     }
     .details {
-        padding: 4%;
-        align-self: center;
+        display: flex;
+        align-items: center;
+    }
+    .multi-toggle {
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+        padding-left: 3%;
+        width: 25%;
+    }
+    .multi-toggle svg {
+        width: 100%;
+    }
+    .flipped {
+        transform: rotate(180deg);
     }
     .action-buttons {
         margin-left: auto;
@@ -173,5 +207,27 @@
 
     .slider.round:before {
     border-radius: 50%;
-    } 
+    }
+    .expanded-body {
+        margin-left: auto;
+        margin-right: auto;
+        width: 95%;
+    }
+    .expanded-details {
+        border-radius: 8px;
+        background-color: #2b2b2b;
+    }
+    .expanded-details:hover {
+        background-color: #313131;
+    }
+    .expanded-details p {
+        margin-bottom: 2%;
+        margin-top: 2%;
+    }
+    .expanded-details .internal-name {
+        padding-top: 1.5%;
+    }
+    .expanded-details .car-name {
+        padding-bottom: 1.5%;
+    }
 </style>
