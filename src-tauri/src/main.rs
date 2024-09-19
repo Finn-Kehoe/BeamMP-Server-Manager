@@ -5,7 +5,6 @@
 
 use tauri::Manager;
 
-mod _mods;
 mod map_change;
 mod update;
 mod util;
