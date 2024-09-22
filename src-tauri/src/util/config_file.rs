@@ -1,4 +1,5 @@
 use std::io::{self, prelude::*};
+use std::process::Command;
 use std::fs;
 
 use crate::util::error;
@@ -78,4 +79,16 @@ pub fn add_authkey(key: String) -> Result<(), error::Error> {
         Ok(_) => Ok(()),
         Err(e) => Err(error::Error::from(e)),
     };
+}
+
+#[tauri::command]
+pub fn user_open_config_file() {
+    let mut config_path = std::env::current_dir().unwrap();
+    config_path.push(std::path::PathBuf::from("ServerConfig.toml"));
+    if cfg!(target_os = "windows") {
+        // "start" command only works in cmd environment
+        Command::new("cmd").args(["/C", "start", "", config_path.to_str().unwrap()]).spawn().expect("");
+    } else {
+        Command::new("xdg-open").args([config_path.to_str().unwrap()]).spawn().expect("");
+    }
 }

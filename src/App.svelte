@@ -58,5 +58,6 @@
     display: flex;
     justify-content: center;
     padding: 2%;
+    padding-bottom: 0%;
   }
 </style>

@@ -36,6 +36,7 @@ fn main() {
             server_control::check_server_status,
             util::config_file::has_authkey,
             util::config_file::add_authkey,
+            util::config_file::user_open_config_file,
         ])
         .build(tauri::generate_context!())
         .expect("error building tauri app")
