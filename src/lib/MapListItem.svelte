@@ -70,9 +70,9 @@
         background-color: #313131;
     }
     .active {
-        border-style: solid !important;
-        border-width: 3px;
-        border-color: #ff7722;
+        outline-style: solid !important;
+        outline-width: 3px;
+        outline-color: #ff7722;
     }
     .details {
         justify-self: center;
