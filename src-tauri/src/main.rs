@@ -12,7 +12,7 @@ mod server_control;
 mod mods;
 
 fn main() {
-    // update::auto_update_server();
+    update::auto_update_server();
     tauri::Builder::default()
         .manage(server_control::Server::start())
         .manage(mods::content::ContentList::empty_init())
