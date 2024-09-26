@@ -127,24 +127,34 @@ fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     let release_assets = &json_full_release["assets"];
 
     let mut download_link = String::new();
+    let is_linux = !cfg!(target_os = "windows");
+    let mut distro_info = String::new();
+    if is_linux {
+        distro_info = String::from_utf8(Command::new("cat").args(["/etc/issue"]).output().expect("").stdout).unwrap();
+    }
     // looping through each asset until the correct one for the users OS is found
     for asset in release_assets.as_array().unwrap() {
-        if cfg!(target_os = "windows") {
+        if !is_linux {
             if asset["name"].to_string().contains("BeamMP-Server.exe") {
-                download_link = asset["browser_download_url"].to_string();
+                download_link = asset["browser_download_url"].as_str().unwrap().to_string();
             }
         } else {
-            if asset["name"].to_string().contains("BeamMP-Server-linux") {
-                download_link = asset["browser_download_url"].to_string();
+            if distro_info.contains("Ubuntu") {
+                if asset["name"].to_string().contains("ubuntu") && asset["name"].to_string().contains("x86_64") {
+                    download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+                }
+            } else if distro_info.contains("Debian") {
+                if asset["name"].to_string().contains("debian") && asset["name"].to_string().contains("x86_64") {
+                    download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+                }
+            } else {
+                panic!("Unsupported OS");
             }
         }
     }
 
-    // download_link has quotation marks ("") that reqwest does not accept
-    // so they have to be stripped off
-    let trimmed_download_link = &download_link[1..download_link.len()-1];
     // downloading file from previously found link
-    let downloaded_file = client.get(trimmed_download_link)
+    let downloaded_file = client.get(download_link)
         .send()?
         .bytes()?;
 
