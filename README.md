@@ -44,3 +44,6 @@ The settings for the BeamMP Server can be accessed by clicking on the settings c
 
 # Joining The Server
 Click [here](https://wiki.beammp.com/en/home/server-installation#how-to-join-your-server) for information on how you and others can join your server.
+
+# Updating The Server
+The BeamMP Server will automatically update as soon as a new version is detected. A new version is checked for each time the manager is started.
