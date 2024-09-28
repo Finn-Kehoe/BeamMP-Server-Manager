@@ -3,12 +3,12 @@ BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in
 
 # Installation
 ## General
-For the server to be connectable to people outside of your local network, it must be port-forwarded. A guide on how to do this can be found [here](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide). The default port that the BeamMP Server uses is `30184`, however, this can be changed in the server settings if you wish.
+For the server to be connectable to people outside of your local network, it must be port-forwarded. A guide on how to do this can be found [here](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide). The default port that the BeamMP Server uses is `30184`, however, this can be changed in the server settings if you wish. Please be aware that port-forwarding on your home network can be dangerous as it could allow someone to gain unauthorized access to your network.
 ## Windows
 1. Download the `BeamMP-Server-Manager.exe` file from the releases tab.
 2. Place the file wherever you want on your computer (it is recommended to put it in a folder).
 3. Run the executable. It should immediately close, and a file called `ServerConfig.toml` will appear.
-4. Generate an AuthKey. A guide can be found [here](https://wiki.beammp.com/en/home/server-installation#h-2-obtaining-an-authentication-key).
+4. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key).
 5. Copy your generated AuthKey and paste it into the quotation marks in the `AuthKey` field.
 6. You can now open the server manager executable, and it will open properly
 ## Linux
@@ -42,7 +42,7 @@ Some mods contain multiple vehicles or variants of vehicles within a single `.zi
 The settings for the BeamMP Server can be accessed by clicking on the settings cog at the bottom right. It will open the settings file in your default text editor. Please keep in mind that any change of these settings will require a restart of the server.
 
 # Joining The Server
-Click [here](https://wiki.beammp.com/en/home/server-installation#how-to-join-your-server) for information on how you and others can join your server.
+Click [here](https://docs.beammp.com/server/create-a-server/#6-how-to-join-your-server) for information on how you and others can join your server.
 
 # Updating The Server
 The BeamMP Server will automatically update as soon as a new version is detected. A new version is checked for each time the manager is started.
