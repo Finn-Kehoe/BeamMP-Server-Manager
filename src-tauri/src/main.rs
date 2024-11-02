@@ -15,6 +15,9 @@ fn main() {
     update::auto_update_server();
     tauri::Builder::default()
         .manage(server_control::Server::start())
+        // wait_on_first_startup is called in a manage function so it can be executed between server startup and when the app uses the servers files
+        // nothing is actually being managed
+        .manage(util::startup::wait_on_first_startup())
         .manage(mods::content::ContentList::empty_init())
         .manage(mods::map::MapList::empty_init())
         .setup(|app| {
