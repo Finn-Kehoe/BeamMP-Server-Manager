@@ -4,6 +4,7 @@
 
 Resources/**
 BeamMP-Server.exe
+BeamMP-Server-linux
 Server.log
 Server.old.log
 ServerConfig.toml
