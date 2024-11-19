@@ -49,8 +49,8 @@
 <li>
     <div class="main-body">
         <div class="details">
-            <p class="internal-name">{modObject.inner_content[0].internal_name}</p>
             <p class="car-name">{modObject.inner_content[0].brand} {modObject.inner_content[0].name}</p>
+            <p class="internal-name">{modObject.inner_content[0].internal_name}</p>
         </div>
         <div class="action-buttons">
             <label class="on-off switch">
@@ -89,6 +89,7 @@
     .details {
         padding: 4%;
         align-self: center;
+        text-align: left;
     }
     .action-buttons {
         margin-left: auto;
