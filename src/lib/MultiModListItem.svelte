@@ -3,6 +3,7 @@
     import { invoke } from "@tauri-apps/api/tauri";
     import type { ContentMod } from "./mod";
     import { modlist_has_been_changed, needs_restart } from "./stores";
+    import { slide } from "svelte/transition";
 
     export let modObject: ContentMod;
     let isActive = modObject.is_active;
@@ -84,7 +85,7 @@
     <div class="expanded-body">
         {#if showExpanded}
             {#each modObject.inner_content as thisInner}
-                <div class="expanded-details">
+                <div class="expanded-details" transition:slide="{{duration: 250}}">
                     <p class="internal-name">{thisInner.internal_name}</p>
                     <p class="car-name">{thisInner.brand} {thisInner.name}</p>
                 </div>
@@ -119,10 +120,13 @@
         width: 25%;
     }
     .multi-toggle svg {
+        transition-property: transform;
+        transition-duration: 0.25s;
+        transition-timing-function: ease-in-out;
         width: 100%;
     }
     .flipped {
-        transform: rotate(180deg);
+        transform: rotate(-180deg);
     }
     .action-buttons {
         margin-left: auto;
