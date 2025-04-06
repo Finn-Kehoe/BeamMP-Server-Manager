@@ -67,6 +67,9 @@
 
     async function stopServer() {
         await invoke("close_server");
+        if (restartFlashing) {
+            needs_restart.set(0);
+        }
     }
 
     async function restartServer() {
