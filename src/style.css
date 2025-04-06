@@ -38,8 +38,9 @@ button {
   outline: none;
 }
 
-button {
+button:hover {
   cursor: pointer;
+  background-color: #3d3d3d;
 }
 
 .titlebar {
