@@ -1,7 +1,7 @@
 use regex::Regex;
 
 use crate::mods;
-use crate::util::{error::Error, config_file};
+use crate::{util::error::Error, settings::file_interaction};
 
 #[tauri::command]
 pub fn change_map(map_name: String, maplist: tauri::State<mods::map::MapList>) -> Result<(), Error> {
@@ -20,7 +20,7 @@ pub fn change_map(map_name: String, maplist: tauri::State<mods::map::MapList>) -
     }
 
     let full_map_path = format!("/levels/{}/info.json", map_name);
-    config_file::change_server_config_value(String::from("Map"), full_map_path, config_file::ConfigTable::General)?;
+    file_interaction::change_server_config_value(String::from("Map"), full_map_path, file_interaction::ConfigTable::General)?;
 
     Ok(())
 }
@@ -28,7 +28,7 @@ pub fn change_map(map_name: String, maplist: tauri::State<mods::map::MapList>) -
 #[tauri::command]
 pub fn get_current_map() -> Result<String, Error> {
     let full_string: String;
-    match config_file::get_server_config_value(String::from("Map"), config_file::ConfigTable::General) {
+    match file_interaction::get_server_config_value(String::from("Map"), file_interaction::ConfigTable::General) {
         Ok(val) => full_string = String::from(val.as_str().unwrap()),
         Err(e) => return Err(Error::from(e)),     
     };

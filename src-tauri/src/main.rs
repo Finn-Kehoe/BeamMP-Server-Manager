@@ -10,6 +10,7 @@ mod update;
 mod util;
 mod server_control;
 mod mods;
+mod settings;
 
 fn main() {
     update::auto_update_server();
@@ -37,9 +38,11 @@ fn main() {
             server_control::close_server,
             server_control::restart_server,
             server_control::check_server_status,
-            util::config_file::has_authkey,
-            util::config_file::add_authkey,
-            util::config_file::user_open_config_file,
+            settings::server_settings::user_open_config_file,
+            settings::server_settings::read_server_settings,
+            settings::server_settings::update_server_config,
+            settings::manager_settings::read_manager_settings,
+            settings::manager_settings::update_manager_config,
         ])
         .build(tauri::generate_context!())
         .expect("error building tauri app")

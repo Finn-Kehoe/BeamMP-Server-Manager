@@ -8,3 +8,4 @@ BeamMP-Server-linux
 Server.log
 Server.old.log
 ServerConfig.toml
+ManagerConfig.toml

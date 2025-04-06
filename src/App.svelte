@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsOverlay from "./lib/SettingsOverlay.svelte";
   import ServerStatusBar from "./lib/ServerStatusBar.svelte";
   import MapList from "./lib/MapList.svelte";
   import ModList from "./lib/ModList.svelte";
@@ -30,10 +31,10 @@
   listen("tauri://file-drop", event => {
     handleFiles(event);
   });
-
 </script>
 
 <main class="container">
+  <SettingsOverlay />
   <div class="server-status-bar">
     <ServerStatusBar />
   </div>

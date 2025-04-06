@@ -1,14 +1,40 @@
 use std::io::{self, prelude::*};
-use std::process::Command;
 use std::fs;
-
-use crate::util::error;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ConfigTable {
     General,
     Misc,
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[serde(tag = "type", content = "value")]
+pub enum ConfigInput {
+    Str(String),
+    Bool(bool),
+    Num(u16),
+}
+
+/*
+pub fn change_toml_value<T: serde::Serialize, P: AsRef<std::path::Path>>(file_path: P, key: Vec<String>, value: T) -> io::Result<()> {
+    let mut raw_file = fs::File::open(&file_path)?;
+    let mut raw_file_string = String::new();
+    raw_file.read_to_string(&mut raw_file_string)?;
+
+    let mut toml_contents = raw_file_string.parse::<toml::Table>().unwrap();
+    let mut current_value: &mut toml::Value;
+    for i in 0..key.len() {
+        if i == 0 {
+            current_value = toml_contents.get_mut(&key[i]).unwrap();
+        } else {
+            current_value = current_value.get_mut(&key[i]).unwrap();
+        }
+    }
+    current_value = toml::Value::try_from(value).unwrap();
+
+    Ok(())
+}
+*/
 
 pub fn change_server_config_value<T: serde::Serialize>(key: String, value: T, table: ConfigTable) -> io::Result<()> {
     let mut config_file_path = std::env::current_dir()?;
@@ -57,38 +83,5 @@ pub fn get_server_config_value(key: String, table: ConfigTable) -> io::Result<to
         }
     } else {
         Err(io::Error::new(io::ErrorKind::NotFound, "server configuration file could not be found"))
-    }
-}
-
-#[tauri::command]
-pub fn has_authkey() -> Result<bool, error::Error> {
-    let seralized_authkey = get_server_config_value(String::from("AuthKey"), ConfigTable::General).unwrap();
-    let authkey = seralized_authkey.as_str().unwrap();
-
-    return if authkey == "" {
-        Ok(false)
-    } else {
-        Ok(true)
-    }
-
-}
-
-#[tauri::command]
-pub fn add_authkey(key: String) -> Result<(), error::Error> {
-    return match change_server_config_value(String::from("AuthKey"), key, ConfigTable::General) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(error::Error::from(e)),
-    };
-}
-
-#[tauri::command]
-pub fn user_open_config_file() {
-    let mut config_path = std::env::current_dir().unwrap();
-    config_path.push(std::path::PathBuf::from("ServerConfig.toml"));
-    if cfg!(target_os = "windows") {
-        // "start" command only works in cmd environment
-        Command::new("cmd").args(["/C", "start", "", config_path.to_str().unwrap()]).spawn().expect("");
-    } else {
-        Command::new("xdg-open").args([config_path.to_str().unwrap()]).spawn().expect("");
     }
 }

@@ -6,3 +6,5 @@ export const needs_restart = writable(0); // 0 = no restart necessary, >0 = rest
 
 export const modlist_has_been_changed = writable(false);
 export const maplist_has_been_changed = writable(false);
+
+export const showSettingsModal = writable(false);
