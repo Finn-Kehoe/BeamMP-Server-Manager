@@ -70,15 +70,9 @@
                 <span class="slider round"></span>
             </label>
             <button class="delete button" on:click={deleteMod}>
-                <svg
-                    style="fill: currentColor;"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512">
-                        <path
-                            d="M199 103v50h-78v30h270v-30h-78v-50H199zm18 18h78v32h-78v-32zm-79.002 80l30.106 286h175.794l30.104-286H137.998zm62.338 13.38l.64 8.98 16 224 .643 8.976-17.956 1.283-.64-8.98-16-224-.643-8.976 17.956-1.283zm111.328 0l17.955 1.284-.643 8.977-16 224-.64 8.98-17.956-1.284.643-8.977 16-224 .64-8.98zM247 215h18v242h-18V215z"
-                        />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+                    <path d="M300.62-128q-38.85 0-64.74-25.88Q210-179.77 210-218.62V-724h-40v-66h188v-38.77h246V-790h188v66h-40v505.38q0 38.35-26.14 64.48Q699.73-128 661.38-128H300.62ZM686-724H276v505.38q0 10.77 6.92 17.7 6.93 6.92 17.7 6.92h360.76q9.24 0 16.93-7.69 7.69-7.69 7.69-16.93V-724ZM371.31-275h66v-368h-66v368Zm153.38 0h66v-368h-66v368ZM276-724v530-530Z"/>
                 </svg>
-                <!-- <img src="/trash-can.svg" alt="Delete" /> -->
             </button>
         </div>
     </div>
@@ -212,25 +206,31 @@
     .slider.round:before {
     border-radius: 50%;
     }
+
     .expanded-body {
         margin-left: auto;
         margin-right: auto;
         width: 95%;
     }
+
     .expanded-details {
         border-radius: 8px;
         background-color: #2b2b2b;
     }
+
     .expanded-details:hover {
         background-color: #313131;
     }
+
     .expanded-details p {
         margin-bottom: 2%;
         margin-top: 2%;
     }
+
     .expanded-details .internal-name {
         padding-top: 1.5%;
     }
+    
     .expanded-details .car-name {
         padding-bottom: 1.5%;
     }
