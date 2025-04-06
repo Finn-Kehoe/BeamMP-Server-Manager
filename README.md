@@ -6,7 +6,7 @@ BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in
 For the server to be connectable to people outside of your local network, it must be port-forwarded. A guide on how to do this can be found [here](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide). The default port that the BeamMP Server uses is `30184`, however, this can be changed in the server settings if you wish. Please be aware that port-forwarding on your home network can be dangerous as it could allow someone to gain unauthorized access to your network.
 ## Windows
 1. Download the `BeamMP-Server-Manager.exe` file from the releases tab.
-2. Place the file wherever you want on your computer (it is recommended to put it in a folder).
+2. Place the file wherever you want on your computer (highly recommended to put it in a folder).
 3. Run the executable. It should immediately close, and a file called `ServerConfig.toml` will appear.
 4. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key).
 5. Copy your generated AuthKey and paste it into the quotation marks in the `AuthKey` field of `ServerConfig.toml`.
@@ -46,6 +46,17 @@ Click [here](https://docs.beammp.com/server/create-a-server/#6-how-to-join-your-
 
 # Updating The Server
 The BeamMP Server will automatically update as soon as a new version is detected. A new version is checked for each time the manager is started.
+
+# Building from Source
+## Prerequisites
+- Rust
+- NPM
+- Tauri CLI (installable with the following command: `npm install --save-dev @tauri-apps/cli@">1.0.0"`)
+## Building
+1. Clone this repository onto your computer (`git clone https://github.com/Finn-Kehoe/BeamMP-Server-Manager.git`).
+2. Navigate to the repository folder in a terminal application.
+3. Execute the command `npm run tauri build`.
+4. The executable can be found (from project root) at `src-tauri/target/release/BeamMP-Server-Manager.exe`. It's portable, so you can take it from here and place it wherever you like before using. To set up and use the manager, refer to the [Installation](#installation) section.
 
 # Additional Information
 For additional information about BeamMP and the BeamMP Server itself, check out the [BeamMP Website](https://www.beammp.com/) and the [BeamMP Server Github Repo](https://github.com/beammp/beammp-server).
