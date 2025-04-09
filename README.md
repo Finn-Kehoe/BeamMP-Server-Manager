@@ -30,7 +30,7 @@ To select a map, just double-click on it. For the change to take effect, the ser
 Any modded content (map, vehicle, or otherwise) can be installed by dragging and dropping the `.zip` file into the manager. It should automatically be added to either the map list or vehicle list depending on the type of content it is. If it is not, it is most likely improperly formatted or otherwise broken.
 
 ### Activation
-Modded content can be in either an activated or deactivated state. If it is activated, it is loaded onto the server and able to be used. If it is deactivated, it is not loaded onto the server and is unable to be used, but it is not deleted. Activation status can be changed using the slider at the top right of each mod. Modded maps are automatically deactivated to shorten loading times for people connecting to the server unless the modded map is currently being played on.
+Modded content can be in either an activated or deactivated state. If it is activated, it is loaded onto the server and able to be used. If it is deactivated, it is not loaded onto the server and is unable to be used, but it is not deleted. Activation status can be changed using the slider at the top right of each mod. Modded maps are automatically deactivated to shorten loading times for people connecting to the server unless the modded map is currently in use.
 
 ### Deletion
 Modded content can be deleted at any time by clicking on the trashcan icon on the bottom right of a mod.
@@ -38,8 +38,12 @@ Modded content can be deleted at any time by clicking on the trashcan icon on th
 ### Multi-Vehicle Mods
 Some mods contain multiple vehicles or variants of vehicles within a single `.zip`. If this is the case, the full list of content in the mod can be viewed by clicking on the arrow on the left of the mod. If there is no arrow, it is not a multi-vehicle mod.
 
+# Settings
+The settings page can be accessed by clicking the settings cog at the bottom right.
 ## Server Settings
-The settings for the BeamMP Server can be accessed by clicking on the settings cog at the bottom right. It will open the settings file in your default text editor. Please keep in mind that any change of these settings will require a restart of the server.
+The most relevant server settings can be found in the settings page. Changes are saved automatically, but the server must be restarted for the changes to take effect. To view and change the full list of settings for the server, click the `Open Server Config File` button at the bottom of the page.
+## Manager Settings
+Currently, the only manager setting available is to enable or disable the automatic updating of the server. Like the server settings, changes are saved automatically.
 
 # Joining The Server
 Click [here](https://docs.beammp.com/server/create-a-server/#6-how-to-join-your-server) for information on how you and others can join your server.
