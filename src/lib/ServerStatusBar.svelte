@@ -63,6 +63,9 @@
 
     async function startServer() {
         await invoke("start_server");
+        if (restartFlashing) {
+            needs_restart.set(0);
+        }
     }
 
     async function stopServer() {
@@ -97,7 +100,7 @@
     <div class="control-buttons">
         <button class="button start" on:click={startServer} disabled={startDisabled}>Start</button>
         <button class="button stop" on:click={stopServer} disabled={stopDisabled}>Stop</button>
-        <button class="button restart" on:click={restartServer} disabled={restartDisabled} class:flashing={restartFlashing}>Restart</button>
+        <button class="button restart" on:click={restartServer} disabled={restartDisabled} class:flashing={(restartFlashing && !restartDisabled)}>Restart</button>
     </div>
 </div>
 
