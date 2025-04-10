@@ -1,6 +1,6 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
-    import { showSettingsModal } from "./stores";
+    import { showSettingsModal, needs_restart } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";
     import { ServerSettings, ManagerSettings } from "./settings";
     import { onMount } from "svelte";
@@ -15,15 +15,17 @@
     let tempMaxCars = serverSettings.max_cars;
     let tempAutoUpdate = managerSettings.auto_update;
 
+    let initialized = 0;
+
     async function getServerSettings() {
         await invoke("read_server_settings")
-            .then((settings: ServerSettings) => serverSettings = settings)
+            .then((settings: ServerSettings) => {serverSettings = settings; initialized++;})
             .catch((e) => console.log(e))
     }
 
     async function getManagerSettings() {
         await invoke("read_manager_settings")
-            .then((settings: ManagerSettings) => managerSettings = settings)
+            .then((settings: ManagerSettings) => {managerSettings = settings; initialized++;})
             .catch((e) => console.log(e))
     }
 
@@ -49,15 +51,21 @@
             await invoke("update_server_config", {key: "MaxCars", value: { type: "Num", value: tempMaxCars }}).then(() => serverSettings.max_cars = tempMaxCars, () => tempMaxCars = serverSettings.max_cars);
         } else if (tempAutoUpdate !== managerSettings.auto_update) {
             await invoke("update_manager_config", {key: "auto_update", value: { type: "Bool", value: tempAutoUpdate }}).then(() => managerSettings.auto_update = tempAutoUpdate, () => tempAutoUpdate = managerSettings.auto_update);
+            // this setting doesn't require server restart, so subtracting from needs_restart cancels out the adding below
+            needs_restart.update((_needsRestart) => _needsRestart - 1);
         }
+        needs_restart.update((_needsRestart) => _needsRestart + 1);
     }
 
-    $: if (serverSettings.server_name !== "" && tempServerName === "") {tempServerName = serverSettings.server_name}
-    $: if (serverSettings.auth_key !== "" && tempAuthKey === "") {tempAuthKey = serverSettings.auth_key}
-    $: if (serverSettings.is_private !== true && tempIsPrivate === true) {tempIsPrivate = serverSettings.is_private}
-    $: if (serverSettings.max_players !== 0 && tempMaxPlayers === 0) {tempMaxPlayers = serverSettings.max_players}
-    $: if (serverSettings.max_cars !== 0 && tempMaxCars === 0) {tempMaxCars = serverSettings.max_cars}
-    $: if (managerSettings.auto_update !== true && tempAutoUpdate === true) {tempAutoUpdate = managerSettings.auto_update}
+    $: if (initialized === 2) {
+        tempServerName = serverSettings.server_name;
+        tempAuthKey = serverSettings.auth_key;
+        tempIsPrivate = serverSettings.is_private;
+        tempMaxPlayers = serverSettings.max_players;
+        tempMaxCars = serverSettings.max_cars;
+        tempAutoUpdate = managerSettings.auto_update;
+        initialized = 3;
+    }
 
 </script>
 
@@ -84,7 +92,7 @@
                     <h4>Private</h4>
                 </div>
                 <label class="on-off switch">
-                    <input type="checkbox" bind:checked={tempIsPrivate} on:blur={sendSettingsChange}>
+                    <input type="checkbox" bind:checked={tempIsPrivate} on:change={sendSettingsChange}>
                     <span class="slider round"></span>
                 </label>
             </div>
@@ -105,7 +113,7 @@
                     <h4>Automatically Update Server</h4>
                 </div>
                 <label class="on-off switch">
-                    <input type="checkbox" bind:checked={tempAutoUpdate} on:blur={sendSettingsChange}>
+                    <input type="checkbox" bind:checked={tempAutoUpdate} on:change={sendSettingsChange}>
                     <span class="slider round"></span>
                 </label>
             </div>
