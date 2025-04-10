@@ -107,7 +107,13 @@ pub fn add_mod(path: String, content_list: tauri::State<ContentList>, map_list: 
     // so we deactivate any new mod maps
     if mod_type == ModType::Map {
         let mut inactive_path = std::env::current_dir()?;
-        inactive_path.push(format!("Resources/Inactive/{}", file_name));
+        inactive_path.push("Resources/Inactive/");
+        // "Resources/Inactive" folder does not exist in standard operation of beammp server, so it must be created
+        // usually, this is done in get_list_of_mods function, but in edge case of first run, that function is not run
+        if !inactive_path.is_dir() {
+            fs::create_dir(inactive_path.clone())?;
+        }
+        inactive_path.push(file_name);
 
         fs::rename(destination_path, inactive_path).unwrap();
     }
@@ -219,7 +225,11 @@ fn examine_mod(mod_name: String, is_active: bool, content_list: &tauri::State<Co
 }
 
 pub fn examine_mods(content_list: tauri::State<ContentList>, map_list: tauri::State<MapList>) -> () {
-    let mod_names = get_list_of_mods().unwrap();
+    let mod_names = match get_list_of_mods() {
+        Ok(list) => list,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {return},
+        Err(e) => panic!("{:?}", e),
+    };
     for _mod in mod_names {
         examine_mod(_mod.0, _mod.1, &content_list, &map_list).unwrap();
     }

@@ -14,7 +14,7 @@ pub enum ServerStatus {
 }
 
 pub struct Server {
-    pub server: Mutex<Child>,
+    pub server: Mutex<Option<Child>>,
     pub startup_is_finished: Mutex<bool>,
 }
 
@@ -25,15 +25,17 @@ impl Server {
     }
 }
 
-fn _start_server() -> Child {
+fn _start_server() -> Option<Child> {
     return if cfg!(target_os = "windows") {
-        Command::new(r".\BeamMP-Server.exe")
-            .spawn()
-            .expect("")
+        match Command::new(r".\BeamMP-Server.exe").spawn() {
+            Ok(ch) => Some(ch),
+            Err(_) => None,
+        }
     } else {
-        Command::new("./BeamMP-Server-linux")
-            .spawn()
-            .expect("")
+        match Command::new("./BeamMP-Server-linux").spawn() {
+            Ok(ch) => Some(ch),
+            Err(_) => None,
+        }
     };
 }
 
@@ -47,15 +49,20 @@ pub fn start_server(server: tauri::State<Server>) -> Result<(), error::Error> {
 
 #[tauri::command]
 pub fn close_server(server: tauri::State<Server>) -> Result<(), error::Error> {
-    return match server.server.lock().unwrap().kill() {
-        Ok(_) => Ok(()),
-        Err(e) => {
-            match e.kind() {
-                ErrorKind::InvalidInput => Ok(()),
-                _ => Err(error::Error::from(e))
+    return match server.server.lock().unwrap().as_mut() {
+        Some(svr) => {
+            match svr.kill() {
+                Ok(_) => Ok(()),
+                Err(e) => {
+                    match e.kind() {
+                        ErrorKind::InvalidInput => Ok(()),
+                        _ => Err(error::Error::from(e))
+                    }
+                }
             }
-        }
-    }
+        },
+        None => Err(error::Error::from(std::io::Error::new(ErrorKind::Other, "server not open"))),
+    };
 }
 
 #[tauri::command]
@@ -71,15 +78,20 @@ pub fn restart_server(server: tauri::State<Server>) -> Result<(), error::Error> 
 #[tauri::command]
 pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus, error::Error> {
     // attempt to collect server's process exit status
-    match server.server.lock().unwrap().try_wait() {
-        // if exit status is able to be collected then server has stopped
-        Ok(Some(_)) => return Ok(ServerStatus::Stopped),
-        // if it isn't than the server is running to some degree
-        Ok(None) => {},
-        Err(e) => {
-            eprintln!("Error checking server status: {e}");
-            return Ok(ServerStatus::Stopped);
-        }
+    match server.server.lock().unwrap().as_mut() {
+        Some(svr) => {
+            match svr.try_wait() {
+                // if exit status is able to be collected then server has stopped
+                Ok(Some(_)) => return Ok(ServerStatus::Stopped),
+                // if it isn't than the server is running to some degree
+                Ok(None) => {},
+                Err(e) => {
+                    eprintln!("Error checking server status: {e}");
+                    return Ok(ServerStatus::Stopped);
+                }
+            }
+        },
+        None => return Ok(ServerStatus::Stopped),
     }
 
     if *server.startup_is_finished.lock().unwrap() {
