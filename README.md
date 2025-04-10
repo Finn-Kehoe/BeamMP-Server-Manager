@@ -7,10 +7,12 @@ For the server to be connectable to people outside of your local network, it mus
 ## Windows
 1. Download the `BeamMP-Server-Manager.exe` file from the releases tab.
 2. Place the file wherever you want on your computer (highly recommended to put it in a folder).
-3. Run the executable. It should immediately close, and a file called `ServerConfig.toml` will appear.
+3. Open the file. (A terminal window will open and then close after a few seconds. This is normal.)
 4. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key).
-5. Copy your generated AuthKey and paste it into the quotation marks in the `AuthKey` field of `ServerConfig.toml`.
-6. You can now open the server manager executable, and it will run properly.
+5. Copy your generated AuthKey. 
+6. Click on the settings cog on the bottom right of the manager.
+7. Paste the AuthKey into the setting labeled `AuthKey`.
+8. You can now click the `Start` button and the server will start normally.
 ## Linux
 **There is currently no Linux executable available for download!**
 
