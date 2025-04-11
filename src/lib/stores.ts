@@ -1,10 +1,10 @@
 import { writable } from "svelte/store";
 
-export const current_map = writable<string>();
+export const currentMap = writable<string>();
 
-export const needs_restart = writable(0); // 0 = no restart necessary, >0 = restart necessary
+export const needsRestart = writable(0); // 0 = no restart necessary, >0 = restart necessary
 
-export const modlist_has_been_changed = writable(false);
-export const maplist_has_been_changed = writable(false);
+export const modlistHasBeenChanged = writable(false);
+export const maplistHasBeenChanged = writable(false);
 
 export const showSettingsModal = writable(false);

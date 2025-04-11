@@ -3,24 +3,24 @@
     import type { MapMod } from "./mod";
     import MapListItem from "./MapListItem.svelte";
     import { onMount } from "svelte";
-    import { current_map, needs_restart, maplist_has_been_changed } from "./stores";
+    import { currentMap, needsRestart, maplistHasBeenChanged } from "./stores";
     import VMapListItem from "./VMapListItem.svelte";
     import { get } from "svelte/store";
 
-    let mod_maps: MapMod[] = [];
+    let modMaps: MapMod[] = [];
     let lastLoadedMap = "";
     let mapHasBeenChanged = false;
 
     async function getModMaps() {
         await invoke("get_mod_maps")
-            .then((_map: MapMod[]) => mod_maps = _map)
-            .catch((_) => mod_maps = []);
+            .then((_map: MapMod[]) => modMaps = _map)
+            .catch((_) => modMaps = []);
     }
 
     async function getCurrentMap() {
         await invoke("get_current_map")
-            .then((_current_map: string) => { lastLoadedMap = _current_map; current_map.set(_current_map); })
-            .catch((_) => current_map.set("gridmap_v2"));
+            .then((_currentMap: string) => { lastLoadedMap = _currentMap; currentMap.set(_currentMap); })
+            .catch((_) => currentMap.set("gridmap_v2"));
     }
 
     onMount(() => {
@@ -28,31 +28,31 @@
         getCurrentMap();
     })
 
-    maplist_has_been_changed.subscribe((hasBeenChanged) => {
+    maplistHasBeenChanged.subscribe((hasBeenChanged) => {
         if (hasBeenChanged) {
             getModMaps();
-            maplist_has_been_changed.set(false);
-            needs_restart.update((_needs_restart) => _needs_restart + 1);
+            maplistHasBeenChanged.set(false);
+            needsRestart.update((_needsRestart) => _needsRestart + 1);
         }
     });
 
-    current_map.subscribe((map) => {
+    currentMap.subscribe((map) => {
         // if the selected map is changed to not the loaded one, add to needs_restart
         if (map !== lastLoadedMap) {
             if (!mapHasBeenChanged) {
-                needs_restart.update((_needs_restart) => _needs_restart + 1);
+                needsRestart.update((_needsRestart) => _needsRestart + 1);
                 mapHasBeenChanged = true;
             }
         // if the loaded map is reselected, subtract to needs_restart
         } else {
-                needs_restart.update((_needs_restart) => _needs_restart !== 0 ? _needs_restart - 1 : 0);
+                needsRestart.update((_needsRestart) => _needsRestart !== 0 ? _needsRestart - 1 : 0);
         }
     });
 
-    needs_restart.subscribe((_needs_restart) => {
+    needsRestart.subscribe((_needsRestart) => {
         // when server is restarted, reset the currently loaded map
-        if (_needs_restart === 0) {
-            lastLoadedMap = get(current_map);
+        if (_needsRestart === 0) {
+            lastLoadedMap = get(currentMap);
             mapHasBeenChanged = false;
         }
     });
@@ -77,7 +77,7 @@
         <svelte:component this={VMapListItem} internal_name={"driver_training"} external_name={"ETK Driver Experience Center"}/>
         <svelte:component this={VMapListItem} internal_name={"derby"} external_name={"Derby Arenas"}/>
         <!--Modded Maps-->
-        {#each mod_maps as item}
+        {#each modMaps as item}
             <svelte:component this={MapListItem} modObject={item}/>
         {/each}
     </ul>

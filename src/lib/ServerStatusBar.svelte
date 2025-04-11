@@ -1,7 +1,7 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
     import { onMount } from "svelte";
-    import { needs_restart } from "./stores";
+    import { needsRestart } from "./stores";
 
     enum ServerStatus {
         Stopped = "Stopped",
@@ -10,7 +10,7 @@
     };
 
     onMount(() => {
-        needs_restart.set(0);
+        needsRestart.set(0);
 
         async function updateServerStatus() {
             await invoke("check_server_status")
@@ -64,14 +64,14 @@
     async function startServer() {
         await invoke("start_server");
         if (restartFlashing) {
-            needs_restart.set(0);
+            needsRestart.set(0);
         }
     }
 
     async function stopServer() {
         await invoke("close_server");
         if (restartFlashing) {
-            needs_restart.set(0);
+            needsRestart.set(0);
         }
     }
 
@@ -79,11 +79,11 @@
         await invoke("restart_server");
         // reset needs_restart when server is restarted
         if (restartFlashing) {
-            needs_restart.set(0);
+            needsRestart.set(0);
         }
     }
 
-    needs_restart.subscribe((_needs_restart) => {
+    needsRestart.subscribe((_needs_restart) => {
         // if needs_restart is "true" (non-zero), then make restart button flash
         if (_needs_restart > 0) {
             restartFlashing = true;

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
-    import { current_map } from "./stores";
+    import { currentMap } from "./stores";
 
     export let internal_name: string;
     export let external_name: string;
@@ -9,10 +9,10 @@
 
     async function setAsCurrentMap() {
         await invoke("change_map", { mapName: internal_name });
-        current_map.set(internal_name);
+        currentMap.set(internal_name);
     }
 
-    current_map.subscribe((map) => {
+    currentMap.subscribe((map) => {
         if (map === internal_name) {
             isActive = true;
         } else {

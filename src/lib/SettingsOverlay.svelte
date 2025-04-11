@@ -1,6 +1,6 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
-    import { showSettingsModal, needs_restart } from "./stores";
+    import { showSettingsModal, needsRestart } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";
     import { ServerSettings, ManagerSettings } from "./settings";
     import { onMount } from "svelte";
@@ -52,9 +52,9 @@
         } else if (tempAutoUpdate !== managerSettings.auto_update) {
             await invoke("update_manager_config", {key: "auto_update", value: { type: "Bool", value: tempAutoUpdate }}).then(() => managerSettings.auto_update = tempAutoUpdate, () => tempAutoUpdate = managerSettings.auto_update);
             // this setting doesn't require server restart, so subtracting from needs_restart cancels out the adding below
-            needs_restart.update((_needsRestart) => _needsRestart - 1);
+            needsRestart.update((_needsRestart) => _needsRestart - 1);
         }
-        needs_restart.update((_needsRestart) => _needsRestart + 1);
+        needsRestart.update((_needsRestart) => _needsRestart + 1);
     }
 
     $: if (initialized === 2) {

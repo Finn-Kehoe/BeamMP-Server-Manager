@@ -7,7 +7,7 @@
 
   import { listen } from "@tauri-apps/api/event"
   import { invoke } from "@tauri-apps/api/tauri";
-  import { modlist_has_been_changed, maplist_has_been_changed } from "./lib/stores"
+  import { modlistHasBeenChanged, maplistHasBeenChanged } from "./lib/stores"
   import { ModType } from "./lib/mod";
 
   async function handleFiles(event) {
@@ -20,9 +20,9 @@
         .catch((e) => {console.log("Error adding mod: ", e)});
       
       if (thisModType === ModType.Content) {
-        modlist_has_been_changed.set(true);
+        modlistHasBeenChanged.set(true);
       } else if (thisModType === ModType.Map) {
-        maplist_has_been_changed.set(true);
+        maplistHasBeenChanged.set(true);
       }
       
     }

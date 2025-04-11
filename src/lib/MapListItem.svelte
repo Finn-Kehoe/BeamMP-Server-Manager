@@ -1,7 +1,7 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
     import type { MapMod } from "./mod";
-    import { current_map, maplist_has_been_changed } from "./stores";
+    import { currentMap, maplistHasBeenChanged } from "./stores";
 
     export let modObject: MapMod;
 
@@ -9,10 +9,10 @@
 
     async function setAsCurrentMap() {
         await invoke("change_map", { mapName: modObject.internal_name });
-        current_map.set(modObject.internal_name);
+        currentMap.set(modObject.internal_name);
     }
 
-    current_map.subscribe((map) => {
+    currentMap.subscribe((map) => {
         if (map === modObject.internal_name) {
             isActive = true;
         } else {
@@ -25,7 +25,7 @@
             await invoke("delete_mod", { fileName: modObject.file_name })
             .catch((e) => { console.log("Error deleteing mod: ", e); });
     
-            maplist_has_been_changed.set(true);
+            maplistHasBeenChanged.set(true);
         }
     }
 

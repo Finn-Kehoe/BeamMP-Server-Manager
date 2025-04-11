@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api/tauri";
     import type { ContentMod } from "./mod";
-    import { modlist_has_been_changed, needs_restart } from "./stores";
+    import { modlistHasBeenChanged, needsRestart } from "./stores";
     import { slide } from "svelte/transition";
 
     export let modObject: ContentMod;
@@ -22,10 +22,10 @@
 
             // if the mod activation is changed from previously loaded value, add to needs_restart
             if (lastLoadedActivation !== isActive) {
-                needs_restart.update((_needs_restart) => _needs_restart + 1);
+                needsRestart.update((_needsRestart) => _needsRestart + 1);
             // if it is put back to previously loaded value, subtract from needs_restart
             } else {
-                needs_restart.update((_needs_restart) => _needs_restart - 1);
+                needsRestart.update((_needsRestart) => _needsRestart - 1);
             }
         }
     }
@@ -34,12 +34,12 @@
         await invoke("delete_mod", { fileName: modObject.file_name })
         .catch((e) => { console.log("Error deleteing mod: ", e); });
 
-        modlist_has_been_changed.set(true);
+        modlistHasBeenChanged.set(true);
     }
 
-    needs_restart.subscribe((_needs_restart) => {
+    needsRestart.subscribe((_needsRestart) => {
         // when server is restarted, reset currently loaded activation state
-        if (_needs_restart === 0) {
+        if (_needsRestart === 0) {
             lastLoadedActivation = isActive;
         }
     });

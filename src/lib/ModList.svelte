@@ -3,7 +3,7 @@
     import type { ContentMod } from "./mod";
     import ModListItem from "./ModListItem.svelte";
     import MultiModListItem from "./MultiModListItem.svelte";
-    import { modlist_has_been_changed, needs_restart } from "./stores";
+    import { modlistHasBeenChanged, needsRestart } from "./stores";
     import { onMount } from "svelte";
 
     let mods: ContentMod[] = [];
@@ -14,11 +14,11 @@
             .catch((_) => mods = []);
     }
 
-    modlist_has_been_changed.subscribe((hasBeenChanged) => {
+    modlistHasBeenChanged.subscribe((hasBeenChanged) => {
         if (hasBeenChanged) {
             getMods();
-            modlist_has_been_changed.set(false);
-            needs_restart.update((_needs_restart) => _needs_restart + 1);
+            modlistHasBeenChanged.set(false);
+            needsRestart.update((_needsRestart) => _needsRestart + 1);
         }
     });
 
