@@ -1,3 +1,7 @@
+#![allow(non_snake_case, dead_code)]
+// to deserialize toml into a struct, all fields must be present and named exactly as they are in the TOML file
+// this causes annoying warnings that this attribute removes
+
 use std::io::{self, prelude::*};
 use std::process::Command;
 use std::fs;
