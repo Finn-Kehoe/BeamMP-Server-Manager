@@ -74,6 +74,7 @@
         <div class="header">
             <h2>Settings</h2>
         </div>
+        <hr class="upper-div" />
         <div class="settings-body">
             <div class="server-name-setting">
                 <div class="setting-title">
@@ -81,12 +82,14 @@
                 </div>
                 <input class="input" bind:value={tempServerName} on:blur={sendSettingsChange}/>
             </div>
+            <hr class="body-div" />
             <div class="authkey-setting">
                 <div class="setting-title">
                     <h4>Authkey</h4>
                 </div>
                 <input class=input bind:value={tempAuthKey} on:blur={sendSettingsChange}/>
             </div>
+            <hr class="body-div" />
             <div class="num private-server-setting">
                 <div class="setting-title">
                     <h4>Private</h4>
@@ -96,18 +99,21 @@
                     <span class="slider round"></span>
                 </label>
             </div>
+            <hr class="body-div" />
             <div class="num max-players-setting">
                 <div class="setting-title">
                     <h4>Max Players</h4>
                 </div>
                 <input type="number" class="num-input" bind:value={tempMaxPlayers} on:blur={sendSettingsChange}/>
             </div>
+            <hr class="body-div" />
             <div class="num max-cars-setting">
                 <div class="setting-title">
                     <h4>Max Cars</h4>
                 </div>
                 <input type="number" class="num-input" bind:value={tempMaxCars} on:blur={sendSettingsChange}/>
             </div>
+            <hr class="body-div" />
             <div class="num autoupdate-setting">
                 <div class="setting-title">
                     <h4>Automatically Update Server</h4>
@@ -117,6 +123,7 @@
                     <span class="slider round"></span>
                 </label>
             </div>
+            <hr class="body-div" />
         </div>
         <div class="bottom-buttons">
             <div class="config-file-button">
@@ -136,10 +143,20 @@
     }
 
     .settings-body {
+        padding-top: 0 !important;
         text-align: left;
         padding: 2%;
         overflow: hidden;
         overflow-y: scroll;
+    }
+
+    .settings-body div {
+        padding-top: 1.2%;
+        padding-bottom: 1.2%;
+    }
+
+    .server-name-setting, .authkey-setting {
+        margin-bottom: 1%;
     }
 
     ::-webkit-scrollbar {
@@ -160,19 +177,45 @@
     }
 
     .setting-title h4 {
-        margin-bottom: 2%;
+        margin-top: 1%;
+        margin-bottom: 1%;
+    }
+
+    hr {
+        border: 0;
+        padding: 0;
+        margin: 2px;
+        display: block;
+    }
+
+    .upper-div {
+        justify-self: center;
+        height: 2px;
+        width: 100%;
+        border-top: 2px solid #3d3d3d;
+    }
+
+    .body-div {
+        height: 1px;
+        border-top: 1px solid #3d3d3d;
     }
 
     .num {
         display: flex;
         align-items: center;
-        padding-top: 3%;
-        padding-bottom: 3%;
+        padding-top: 2.5%;
+        padding-bottom: 2.5%;
     }
 
     .num div.setting-title h4 {
-        margin-top: 5%;
-        margin-bottom: 5%;
+        margin: auto + 1%;
+    }
+
+    .input {
+        width: 85%;
+        padding-left: 1em;
+        padding-right: 1em;
+        text-align: center;
     }
 
     .num-input {
