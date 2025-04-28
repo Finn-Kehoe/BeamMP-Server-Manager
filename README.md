@@ -4,6 +4,8 @@ BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in
 # Installation
 ## General
 For the server to be connectable to people outside of your local network, it must be port-forwarded. A guide on how to do this can be found [here](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide). The default port that the BeamMP Server uses is `30184`, however, this can be changed in the server settings if you wish. Please be aware that port-forwarding on your home network can be dangerous as it could allow someone to gain unauthorized access to your network.
+
+If you already have a BeamMP server set up and wish to integrate the server manager with it, follow the instructions [here](#integrating-with-existing-server).
 ## Windows
 1. Download the `BeamMP-Server-Manager.exe` file from the releases tab.
 2. Place the file wherever you want on your computer (highly recommended to put it in a folder).
@@ -19,6 +21,11 @@ For the server to be connectable to people outside of your local network, it mus
 The only supported Linux distributions are Ubuntu and Debian. Both require `liblua5.3` to be installed to work correctly.
 
 Linux installation is identical to Windows except for the file downloaded from the releases, so follow the instructions for Windows but be sure to download the correct file from the releases tab.
+
+## Integrating With Existing Server
+1. Download the executable for your OS.
+2. Place the executable in the folder where your server executable is.
+3. Run the manager. Everything will integrate automatically.
 
 # Usage
 ## Server Control
@@ -51,7 +58,7 @@ Currently, the only manager setting available is to enable or disable the automa
 Click [here](https://docs.beammp.com/server/create-a-server/#6-how-to-join-your-server) for information on how you and others can join your server.
 
 # Updating The Server
-The BeamMP Server will automatically update as soon as a new version is detected. A new version is checked for each time the manager is started.
+If automatic updating is enabled in the settings, the BeamMP Server will update as soon as a new version is detected. A new version is checked for each time the manager is started.
 
 # Building from Source
 ## Prerequisites
