@@ -61,4 +61,7 @@
     padding: 2%;
     padding-bottom: 0%;
   }
+  .bottom-bar {
+    margin-top: 0.75%;
+  }
 </style>
