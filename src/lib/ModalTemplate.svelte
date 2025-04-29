@@ -6,6 +6,7 @@
     };
 
     export let show = false;
+    export let width = "40%";
     export let onClose = () => {};
 </script>
 
@@ -15,7 +16,7 @@
 {#if show}
     <div class="modal-wrapper">
         <div class="modal-background" on:click={onClose}>
-            <div class="modal" on:click|stopPropagation transition:fade={{duration: 150}}>
+            <div class="modal" on:click|stopPropagation transition:fade={{duration: 150}} style:width={width}>
                 <slot />
             </div>
         </div>
@@ -38,6 +39,5 @@
         padding: 1.5rem;
         border-radius: 0.5rem;
         z-index: 1000;
-        width: 40%;
     }
 </style>
