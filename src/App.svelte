@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AuthKeyCheckpoint from "./lib/AuthKeyCheckpoint.svelte";
   import SettingsOverlay from "./lib/SettingsOverlay.svelte";
   import ServerStatusBar from "./lib/ServerStatusBar.svelte";
   import MapList from "./lib/MapList.svelte";
@@ -24,7 +25,6 @@
       } else if (thisModType === ModType.Map) {
         maplistHasBeenChanged.set(true);
       }
-      
     }
   }
 
@@ -34,6 +34,7 @@
 </script>
 
 <main class="container">
+  <AuthKeyCheckpoint />
   <SettingsOverlay />
   <div class="server-status-bar">
     <ServerStatusBar />

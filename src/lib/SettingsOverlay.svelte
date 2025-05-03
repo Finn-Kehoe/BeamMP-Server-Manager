@@ -1,6 +1,6 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/tauri";
-    import { showSettingsModal, needsRestart } from "./stores";
+    import { showSettingsModal, showAuthModal, needsRestart } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";
     import { ServerSettings, ManagerSettings } from "./settings";
     import { onMount } from "svelte";
@@ -64,6 +64,11 @@
         tempMaxPlayers = serverSettings.max_players;
         tempMaxCars = serverSettings.max_cars;
         tempAutoUpdate = managerSettings.auto_update;
+
+        if (tempAuthKey === "") {
+            $showAuthModal = true;
+        }
+
         initialized = 3;
     }
 
@@ -141,7 +146,6 @@
         margin-top: 0%;
         margin-bottom: 3%;
     }
-
     .settings-body {
         padding-top: 0 !important;
         text-align: left;
@@ -149,21 +153,17 @@
         overflow: hidden;
         overflow-y: scroll;
     }
-
     .settings-body div {
         padding-top: 1.2%;
         padding-bottom: 1.2%;
     }
-
     .server-name-setting, .authkey-setting {
         margin-bottom: 1%;
     }
-
     ::-webkit-scrollbar {
         background-color: transparent;
         width: 10px;
     }
-
     ::-webkit-scrollbar-thumb {
         background-clip: padding-box;
         border: 3px solid transparent;
@@ -171,53 +171,44 @@
         border-radius: 5%;
         background-color: #383838;
     }
-
     ::-webkit-scrollbar-thumb:hover {
         background-color: #3d3d3d;
     }
-
     .setting-title h4 {
         margin-top: 1%;
         margin-bottom: 1%;
     }
-
     hr {
         border: 0;
         padding: 0;
         margin: 2px;
         display: block;
     }
-
     .upper-div {
         justify-self: center;
         height: 2px;
         width: 100%;
         border-top: 2px solid #3d3d3d;
     }
-
     .body-div {
         height: 1px;
         border-top: 1px solid #3d3d3d;
     }
-
     .num {
         display: flex;
         align-items: center;
         padding-top: 2.5%;
         padding-bottom: 2.5%;
     }
-
     .num div.setting-title h4 {
         margin: auto + 1%;
     }
-
     .input {
         width: 85%;
         padding-left: 1em;
         padding-right: 1em;
         text-align: center;
     }
-
     .num-input {
         padding-left: 2%;
         padding-right: 2%;
@@ -225,41 +216,31 @@
         margin-left: 7%;
         text-align: center;
     }
-
     .switch {
         margin-left: 5%;
     }
-
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
-
     .bottom-buttons {
         display: flex;
     }
-
     .close-button {
         margin-left: auto;
     }
-
-    /* The switch - the box around the slider */
     .switch {
     position: relative;
     display: inline-block;
     width: 50px;
     height: 24px;
     }
-
-    /* Hide default HTML checkbox */
     .switch input {
     opacity: 0;
     width: 0;
     height: 0;
     }
-
-    /* The slider */
     .slider {
     position: absolute;
     cursor: pointer;
@@ -271,7 +252,6 @@
     -webkit-transition: .4s;
     transition: .4s;
     }
-
     .slider:before {
     position: absolute;
     content: "";
@@ -283,26 +263,20 @@
     -webkit-transition: .4s;
     transition: .4s;
     }
-
     input:checked + .slider {
     background-color: #ff7722;
     }
-
     input:focus + .slider {
     box-shadow: 0 0 1px #ff7722;
     }
-
     input:checked + .slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
     }
-
-    /* Rounded sliders */
     .slider.round {
     border-radius: 34px;
     }
-
     .slider.round:before {
     border-radius: 50%;
     } 

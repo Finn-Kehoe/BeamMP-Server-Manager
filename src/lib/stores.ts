@@ -8,3 +8,4 @@ export const modlistHasBeenChanged = writable(false);
 export const maplistHasBeenChanged = writable(false);
 
 export const showSettingsModal = writable(false);
+export const showAuthModal = writable(false);
