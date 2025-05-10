@@ -3,8 +3,12 @@ use std::io::ErrorKind;
 use std::sync::Mutex;
 
 use crate::util::error;
+use crate::settings::manager_settings;
 
 use regex::Regex;
+
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 
 #[derive(serde::Serialize)]
 pub enum ServerStatus {
@@ -27,9 +31,16 @@ impl Server {
 
 fn _start_server() -> Option<Child> {
     return if cfg!(target_os = "windows") {
-        match Command::new(r".\BeamMP-Server.exe").spawn() {
-            Ok(ch) => Some(ch),
-            Err(_) => None,
+        if manager_settings::_read_manager_settings().unwrap().show_server_terminal == true {
+            match Command::new(r".\BeamMP-Server.exe").spawn() {
+                Ok(ch) => Some(ch),
+                Err(_) => None,
+            }
+        } else {
+            match Command::new(r".\BeamMP-Server.exe").creation_flags(0x08000000).spawn() {
+                Ok(ch) => Some(ch),
+                Err(_) => None,
+            }
         }
     } else {
         match Command::new("./BeamMP-Server-linux").spawn() {

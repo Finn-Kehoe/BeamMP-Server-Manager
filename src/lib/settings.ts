@@ -8,4 +8,5 @@ export class ServerSettings {
 
 export class ManagerSettings {
     auto_update: boolean;
+    show_server_terminal: boolean;
 }

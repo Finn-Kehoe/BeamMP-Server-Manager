@@ -6,6 +6,7 @@ use crate::{util::error, settings::file_interaction};
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct ManagerSettings {
     pub auto_update: bool,
+    pub show_server_terminal: bool,
 }
 
 #[tauri::command]
@@ -28,7 +29,7 @@ pub fn _read_manager_settings() -> Result<ManagerSettings, error::Error> {
     } else {
         // "ManagerConfig.toml" does not exist in normal running of server, so it must be created by us
         // its nonexistance implies this is a first-time run, so auto_update must be true to download the server for the first time
-        let default_settings: ManagerSettings = ManagerSettings { auto_update: true };
+        let default_settings: ManagerSettings = ManagerSettings { auto_update: true, show_server_terminal: false };
         fs::write(manager_config_path, toml::to_string_pretty(&default_settings).unwrap())?;
         Ok(default_settings)
     }

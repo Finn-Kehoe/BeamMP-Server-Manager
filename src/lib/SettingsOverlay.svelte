@@ -6,7 +6,7 @@
     import { onMount } from "svelte";
 
     let serverSettings: ServerSettings = {server_name: "", auth_key: "", is_private: true, max_cars: 0, max_players: 0};
-    let managerSettings: ManagerSettings = {auto_update: true};
+    let managerSettings: ManagerSettings = {auto_update: true, show_server_terminal: false};
 
     let tempServerName = serverSettings.server_name;
     let tempAuthKey = serverSettings.auth_key;
@@ -14,6 +14,7 @@
     let tempMaxPlayers = serverSettings.max_players;
     let tempMaxCars = serverSettings.max_cars;
     let tempAutoUpdate = managerSettings.auto_update;
+    let tempShowServerTerminal = managerSettings.show_server_terminal;
 
     let initialized = 0;
 
@@ -53,6 +54,8 @@
             await invoke("update_manager_config", {key: "auto_update", value: { type: "Bool", value: tempAutoUpdate }}).then(() => managerSettings.auto_update = tempAutoUpdate, () => tempAutoUpdate = managerSettings.auto_update);
             // this setting doesn't require server restart, so subtracting from needs_restart cancels out the adding below
             needsRestart.update((_needsRestart) => _needsRestart - 1);
+        } else if (tempShowServerTerminal !== managerSettings.show_server_terminal) {
+            await invoke("update_manager_config", {key: "show_server_terminal", value: { type: "Bool", value: tempShowServerTerminal }}).then(() => managerSettings.show_server_terminal = tempShowServerTerminal, () => tempShowServerTerminal = managerSettings.show_server_terminal);
         }
         needsRestart.update((_needsRestart) => _needsRestart + 1);
     }
@@ -64,6 +67,7 @@
         tempMaxPlayers = serverSettings.max_players;
         tempMaxCars = serverSettings.max_cars;
         tempAutoUpdate = managerSettings.auto_update;
+        tempShowServerTerminal = managerSettings.show_server_terminal;
 
         if (tempAuthKey === "") {
             $showAuthModal = true;
@@ -129,6 +133,16 @@
                 </label>
             </div>
             <hr class="body-div" />
+            <div class="num showserverterminal-setting">
+                <div class="setting-title">
+                    <h4>Show Server Terminal</h4>
+                </div>
+                <label class="on-off switch">
+                    <input type="checkbox" bind:checked={tempShowServerTerminal} on:change={sendSettingsChange}>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <hr class="body-div" />
         </div>
         <div class="bottom-buttons">
             <div class="config-file-button">
@@ -152,6 +166,7 @@
         padding: 2%;
         overflow: hidden;
         overflow-y: scroll;
+        height: 67vh;
     }
     .settings-body div {
         padding-top: 1.2%;

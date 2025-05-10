@@ -15,7 +15,7 @@ If you already have a BeamMP server set up and wish to integrate the server mana
 1. Download the `BeamMP-Server-Manager.exe` file from the releases tab.
 2. Place the file in a folder on your computer.
 3. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key).
-4. Open the manager file. (A terminal window will open and then close after a few seconds. This is normal.)
+4. Open the manager file. (A terminal window may open and then close after a few seconds. This is normal.)
 5. Copy your generated AuthKey.
 6. Paste your AuthKey where prompted.
 7. You can now click the `Start` button and the server will start normally.
@@ -72,7 +72,12 @@ The most relevant server settings can be found in the settings page. Changes are
 
 ### Manager Settings
 
-Currently, the only manager setting available is to enable or disable the automatic updating of the server. Like the server settings, changes are saved automatically.
+- Toggle Automatic Server Updates (default: on)
+- Show Server Terminal (default: off)
+
+> The "Show Server Terminal" setting only has an effect on Windows. On Linux, the terminal will always be shown.
+
+Like the server settings, changes are saved automatically.
 
 ## Joining The Server
 

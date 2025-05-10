@@ -39,5 +39,6 @@
         padding: 1.5rem;
         border-radius: 0.5rem;
         z-index: 1000;
+        max-height: 85%;
     }
 </style>
