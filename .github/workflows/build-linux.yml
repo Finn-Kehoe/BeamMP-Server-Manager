@@ -41,5 +41,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BeamMP-Server-Manager
-          path: src-tauri/target/release/BeamMP-Server-Manager
+          path: /home/runner/work/BeamMP-Server-Manager/BeamMP-Server-Manager/src-tauri/target/release/bundle/deb/beam-mp-server-manager_{process.env.PACKAGE_VERSION}_amd64.deb
 
