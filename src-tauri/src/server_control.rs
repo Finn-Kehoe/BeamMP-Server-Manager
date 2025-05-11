@@ -29,25 +29,29 @@ impl Server {
     }
 }
 
+#[cfg(target_os = "windows")]
 fn _start_server() -> Option<Child> {
-    return if cfg!(target_os = "windows") {
-        if manager_settings::_read_manager_settings().unwrap().show_server_terminal == true {
-            match Command::new(r".\BeamMP-Server.exe").spawn() {
-                Ok(ch) => Some(ch),
-                Err(_) => None,
-            }
-        } else {
-            match Command::new(r".\BeamMP-Server.exe").creation_flags(0x08000000).spawn() {
-                Ok(ch) => Some(ch),
-                Err(_) => None,
-            }
-        }
-    } else {
-        match Command::new("./BeamMP-Server-linux").spawn() {
+    if manager_settings::_read_manager_settings().unwrap().show_server_terminal == true {
+        return match Command::new(r".\BeamMP-Server.exe").spawn() {
             Ok(ch) => Some(ch),
             Err(_) => None,
         }
-    };
+    } else {
+        return match Command::new(r".\BeamMP-Server.exe")
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .spawn() {
+                Ok(ch) => Some(ch),
+                Err(_) => None,
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _start_server() -> Option<Child> {
+    return match Command::new("./BeamMP-Server-linux").spawn() {
+        Ok(ch) => Some(ch),
+        Err(_) => None,
+    }
 }
 
 #[tauri::command]
