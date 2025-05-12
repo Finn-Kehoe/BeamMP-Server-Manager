@@ -130,13 +130,14 @@
         width: 25%;
     }
     .multi-toggle svg {
+        transform: rotate(0deg);
         transition-property: transform;
         transition-duration: 0.25s;
         transition-timing-function: ease-in-out;
         width: 100%;
     }
     .flipped {
-        transform: rotate(-180deg);
+        transform: rotate(-90deg) !important;
     }
     .action-buttons {
         margin-left: auto;
