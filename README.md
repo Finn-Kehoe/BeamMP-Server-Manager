@@ -10,9 +10,7 @@ For the server to be connectable to people outside of your local network, it mus
 
 If you already have a BeamMP server set up and wish to integrate the server manager with it, follow the instructions [here](#integrating-with-existing-server).
 
-### Windows
-
-1. Download the `BeamMP-Server-Manager.exe` file from the releases tab.
+1. Download the executable for your operating system (outlined below) from the releases tab.
 2. Place the file in a folder on your computer.
 3. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key).
 4. Open the manager file. (A terminal window may open and then close after a few seconds. This is normal.)
@@ -20,13 +18,18 @@ If you already have a BeamMP server set up and wish to integrate the server mana
 6. Paste your AuthKey where prompted.
 7. You can now click the `Start` button and the server will start normally.
 
+### Windows
+
+There are two available files for download for Windows.
+
+- `BeamMP-Server-Manager.exe`: The recommended file to download. A portable executable that can be drag and dropped and run anywhere.
+- `BeamMP-Server-Manager_{VERSION_NUMBER}_x64_en-US.msi`: An installer for the executable with a slightly smaller file size.
+
 ### Linux
 
-**There is currently no Linux executable available for download!**
+**There are currently no Linux executables available for download!**
 
 The only supported Linux distributions are Ubuntu and Debian. Both require `liblua5.3` to be installed to work correctly.
-
-Linux installation is identical to Windows except for the file downloaded from the releases, so follow the instructions for Windows but be sure to download the correct file from the releases tab.
 
 ### Integrating With Existing Server
 
