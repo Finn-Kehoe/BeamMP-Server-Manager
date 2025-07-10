@@ -95,15 +95,16 @@ If automatic updating is enabled in the settings, the BeamMP Server will update 
 ### Prerequisites
 
 - Rust
-- NPM
-- Tauri CLI (installable with the following command: `npm install --save-dev @tauri-apps/cli@">1.0.0"`)
+- npm
 
 ### Building
 
 1. Clone this repository onto your computer (`git clone https://github.com/Finn-Kehoe/BeamMP-Server-Manager.git`).
 2. Navigate to the repository folder in a terminal application.
-3. Execute the command `npm run tauri build`.
-4. The executable can be found (from project root) at `src-tauri/target/release/BeamMP-Server-Manager.exe`. It's portable, so you can take it from here and place it wherever you like before using. To set up and use the manager, refer to the [Installation](#installation) section.
+3. Execute the command `npm install`.
+4. Execute the command `npm run tauri build`.
+
+The executable can be found (from project root) at `src-tauri/target/release/`. It is called `BeamMP-Server-Manager.exe` on Windows and `BeamMP-Server-Manager` on Linux. It's portable, so you can take it from here and place it wherever you like before using. To set up and use the manager, refer to the [Installation](#installation) section.
 
 ## Additional Information
 
