@@ -2,6 +2,8 @@
 
 BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in small-scale, self-hosted servers. In the manager, you can add and remove mods (vehicles and maps), as well as select the current map. It has no relation to and is not endorsed in any way by the creators of the BeamMP mod or the BeamMP Server.
 
+<p align="center"><img src="ui_showcase.png" width="500" /></p>
+
 ## Installation
 
 ### General
