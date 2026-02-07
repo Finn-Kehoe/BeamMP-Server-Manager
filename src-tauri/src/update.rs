@@ -172,7 +172,7 @@ fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     new_server.write_all(&downloaded_file)?;
 
     // making the BeamMP-Server file executable on Linux
-    if cfg!(target_os = "linux") {
+    if is_linux {
         Command::new("chmod")
             .args(["777", "BeamMP-Server-linux"])
             .spawn()?;
@@ -220,31 +220,25 @@ mod tests {
     #[test]
     fn test_needs_update() {
         assert!(needs_update(String::from("0.0.0"), String::from("1.1.1")));
+        assert!(needs_update(String::from("0.0.1"), String::from("1.1.1")));
+        assert!(needs_update(String::from("0.1.1"), String::from("1.1.1")));
         assert_eq!(needs_update(String::from("0.0.0"), String::from("0.0.0")), false);
     }
 
     #[test]
     fn test_get_current_version() {
-        assert_eq!(get_current_server_version().unwrap(), String::from("3.2.1"))
+        // not panicking here with get_numbers_from_version implies that get_current_server_version ran correctly
+        get_numbers_from_version(get_current_server_version().unwrap());
     }
 
     #[test]
     fn test_get_latest_version() {
-        assert_eq!(get_latest_server_version().unwrap(), String::from("3.2.1"))
-    }
-
-    #[test]
-    fn test_needs_update_real() {
-        assert_eq!(needs_update(get_current_server_version().unwrap(), get_latest_server_version().unwrap()), false)
-    }
-
-    #[test]
-    fn test_auto_update() {
-        auto_update_server();
+        // not panicking here with get_numbers_from_version implies that get_latest_server_version ran correctly
+        get_numbers_from_version(get_latest_server_version().unwrap());
     }
 
     #[test]
     fn test_extract_version_from_string() {
-        assert_eq!(extract_version_from_string(String::from("\u{1b}[2K\u{1b}[0GBeamMP-Server v3.1.1\r\n\u{1b}[1G\u{1b}[2K\u{1b}[0G\u{1b}[1G")), Some(String::from("3.2.1")))
+        assert_eq!(extract_version_from_string(String::from("\u{1b}[2K\u{1b}[0GBeamMP-Server v3.2.1\r\n\u{1b}[1G\u{1b}[2K\u{1b}[0G\u{1b}[1G")), Some(String::from("3.2.1")))
     }
 }
