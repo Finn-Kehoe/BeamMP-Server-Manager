@@ -8,14 +8,14 @@ BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in
 
 ### General
 
-For the server to be connectable to people outside of your local network, it must be port-forwarded. A guide on how to do this can be found [here](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide). The default port that the BeamMP Server uses is `30184`, however, this can be changed in the server settings if you wish. Please be aware that port-forwarding on your home network can be dangerous as it could allow someone to gain unauthorized access to your network.
+For the server to be connectable to people outside of your local network, it must be port-forwarded. A guide on how to do this can be found [here](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide). The default port that the BeamMP Server uses is `30184`; this can be changed in the server settings if you wish. Please be aware that port-forwarding on your home network can be dangerous as it could allow someone to gain unauthorized access to your network.
 
 If you already have a BeamMP server set up and wish to integrate the server manager with it, follow the instructions [here](#integrating-with-existing-server).
 
 1. Download the executable for your operating system (outlined below) from the releases tab.
 2. Place the file in a folder on your computer.
-3. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key).
-4. Open the manager file. (A terminal window may open and then close after a few seconds. This is normal.)
+3. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key) (only follow steps in section 2).
+4. Open the manager executable. (A terminal window may open and then close after a few seconds. This is normal.)
 5. Copy your generated AuthKey.
 6. Paste your AuthKey where prompted.
 7. You can now click the `Start` button and the server will start normally.
