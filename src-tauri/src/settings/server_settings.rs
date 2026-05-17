@@ -33,8 +33,7 @@ struct General {
 #[derive(serde::Deserialize, Debug)]
 struct Misc {
     ImScaredOfUpdates: bool,
-    SendErrorsShowMessage: bool,
-    SendErrors: bool,
+    UpdateReminderTime: String,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
