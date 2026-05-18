@@ -6,16 +6,17 @@
   import ModList from "./lib/ModList.svelte";
   import BottomBar from "./lib/BottomBar.svelte";
 
-  import { listen } from "@tauri-apps/api/event"
   import { invoke } from "@tauri-apps/api/core";
+  import { onMount } from "svelte";
+  import { getCurrentWebview } from '@tauri-apps/api/webview';
   import { modlistHasBeenChanged, maplistHasBeenChanged } from "./lib/stores"
   import { ModType } from "./lib/mod";
 
-  async function handleFiles(event) {
+  async function handleFiles(files) {
     let thisModType: ModType;
-    for (let i = 0; i < event.payload.length; i++) {
+    for (let i = 0; i < files.length; i++) {
       // we get path to file from file drop event
-      let thisPath = event.payload[i];
+      let thisPath = files[i];
       await invoke("add_mod", { path: thisPath })
         .then((modType: ModType) => thisModType = modType)
         .catch((e) => {console.log("Error adding mod: ", e)});
@@ -28,8 +29,18 @@
     }
   }
 
-  listen("tauri://file-drop", event => {
-    handleFiles(event);
+  onMount(async () => {
+
+    const unlisten = await getCurrentWebview().onDragDropEvent((event) => {
+      if (event.payload.type === 'drop') {
+        console.log('Dropped files:', event.payload.paths);
+        handleFiles(event.payload.paths);
+      }
+    });
+
+    return () => {
+      unlisten();
+    };
   });
 </script>
 
