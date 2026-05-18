@@ -230,8 +230,12 @@ pub fn examine_mods(content_list: tauri::State<ContentList>, map_list: tauri::St
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {return},
         Err(e) => panic!("{:?}", e),
     };
+    
     for _mod in mod_names {
-        examine_mod(_mod.0, _mod.1, &content_list, &map_list).unwrap();
+        match examine_mod(_mod.0, _mod.1, &content_list, &map_list) {
+            Ok(_) => (),
+            Err(_) => continue, // error usually implies files in Resources folder that are not mods, so just ignore them
+        }
     }
 
     // alphabetically sorting both lists
