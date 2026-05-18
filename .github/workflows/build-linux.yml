@@ -1,45 +1,86 @@
-# adapted from https://github.com/tauri-apps/tauri-action/blob/dev/examples/test-build-only.yml
-name: Build-Linux
+name: Build BeamMP-Server-Manager (Ubuntu)
 
 on: workflow_dispatch
 
 jobs:
-  test-tauri:
-    strategy:
-      fail-fast: false
+  build:
+    name: Build BeamMP-Server-Manager (Ubuntu)
+    runs-on: ubuntu-latest
 
-    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ '' }}
-
-      - name: install dependencies
+      # ── 2. System dependencies required by Tauri on Linux ─────────────────
+      - name: Install Linux system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y \
+            libwebkit2gtk-4.0-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            pkg-config \
+            build-essential \
+            curl \
+            wget \
+            file
 
-      - name: install frontend dependencies
-        run: npm install
+      # ── 3. Rust toolchain ──────────────────────────────────────────────────
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
 
-      # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
-      - uses: tauri-apps/tauri-action@v0
+      # Cache Cargo registry + build artefacts to speed up subsequent runs
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # ── 4. Node.js + frontend dependencies ────────────────────────────────
+      #    Remove this section if your Tauri app has no JS frontend.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm          # swap for 'yarn' or 'pnpm' if needed
+
+      - name: Install frontend dependencies
+        run: npm ci           # swap for 'yarn install --frozen-lockfile' or 'pnpm install'
+
+      # ── 5. Build ───────────────────────────────────────────────────────────
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: ${{ '' }}
-          
-      - name: Upload Binary
+          # args: --target x86_64-unknown-linux-gnu   # explicit target if needed
+          # tauriScript: npm run tauri                # override if using a custom script
+          includeDebug: false
+
+      # ── 6. Upload build artifacts ──────────────────────────────────────────
+      - name: Upload .deb package
         uses: actions/upload-artifact@v4
         with:
           name: BeamMP-Server-Manager
-          path: '/home/runner/work/BeamMP-Server-Manager/BeamMP-Server-Manager/src-tauri/target/release/bundle/deb/beam-mp-server-manager_${process.env.PACKAGE_VERSION}_amd64.deb'
+          # tauri-action places bundles under src-tauri/target/release/bundle/
+          path: src-tauri/target/release/bundle/deb/*.deb
+          if-no-files-found: warn
+          retention-days: 7
 
+      # - name: Upload .AppImage
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: tauri-app-appimage
+      #     path: src-tauri/target/release/bundle/appimage/*.AppImage
+      #     if-no-files-found: warn
+      #     retention-days: 7
