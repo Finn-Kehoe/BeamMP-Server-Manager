@@ -238,10 +238,15 @@ pub fn examine_mods(content_list: tauri::State<ContentList>, map_list: tauri::St
         }
     }
 
+    sort_mods(&content_list, &map_list);
+}
+
+fn sort_mods(content_list: &tauri::State<ContentList>, map_list: &tauri::State<MapList>) -> () {
     // alphabetically sorting both lists
     map_list.maps.lock().unwrap().sort_unstable_by_key(|this_map| 
         this_map.external_name.to_lowercase() 
     );
+
     content_list.content_mods.lock().unwrap().sort_unstable_by_key(|this_content| 
         if this_content.inner_content.len() == 1 {
             this_content.inner_content[0].brand.to_lowercase() + &this_content.inner_content[0].name.to_lowercase()
@@ -249,5 +254,4 @@ pub fn examine_mods(content_list: tauri::State<ContentList>, map_list: tauri::St
             this_content.file_name.to_lowercase()
         }
     );
-
 }
