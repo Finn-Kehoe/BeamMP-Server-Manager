@@ -6,15 +6,16 @@
 use tauri::Manager;
 
 mod map_change;
+mod mods;
+mod server_control;
+mod settings;
 mod update;
 mod util;
-mod server_control;
-mod mods;
-mod settings;
 
 fn main() {
     update::auto_update_server();
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .manage(server_control::Server::start())
         // wait_on_first_startup is called in a manage function so it can be executed between server startup and when the app uses the servers files
         // nothing is actually being managed
@@ -23,7 +24,10 @@ fn main() {
         .manage(mods::map::MapList::empty_init())
         .setup(|app| {
             let handle = app.handle();
-            mods::generic::examine_mods(handle.state::<mods::content::ContentList>(), handle.state::<mods::map::MapList>());
+            mods::generic::examine_mods(
+                handle.state::<mods::content::ContentList>(),
+                handle.state::<mods::map::MapList>(),
+            );
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -46,7 +50,7 @@ fn main() {
         ])
         .build(tauri::generate_context!())
         .expect("error building tauri app")
-        .run(|handle,event| match event {
+        .run(|handle, event| match event {
             tauri::RunEvent::Exit => {
                 match server_control::close_server(handle.state::<server_control::Server>()) {
                     Ok(_) => (),
@@ -58,6 +62,6 @@ fn main() {
                     }
                 };
             }
-            _ => ()
+            _ => (),
         });
 }

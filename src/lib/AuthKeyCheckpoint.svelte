@@ -1,6 +1,6 @@
 <script lang="ts">
     import ModalTemplate from "./ModalTemplate.svelte";
-    import { invoke } from "@tauri-apps/api/tauri";
+    import { invoke } from "@tauri-apps/api/core";
     import { showAuthModal } from "./stores";
 
     let tempAuthKey = ""

@@ -7,7 +7,7 @@
   import BottomBar from "./lib/BottomBar.svelte";
 
   import { listen } from "@tauri-apps/api/event"
-  import { invoke } from "@tauri-apps/api/tauri";
+  import { invoke } from "@tauri-apps/api/core";
   import { modlistHasBeenChanged, maplistHasBeenChanged } from "./lib/stores"
   import { ModType } from "./lib/mod";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/tauri"
+    import { invoke } from "@tauri-apps/api/core"
     import type { ContentMod } from "./mod";
     import ModListItem from "./ModListItem.svelte";
     import MultiModListItem from "./MultiModListItem.svelte";

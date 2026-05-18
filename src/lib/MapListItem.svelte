@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/tauri";
+    import { invoke } from "@tauri-apps/api/core";
     import type { MapMod } from "./mod";
     import { currentMap, maplistHasBeenChanged } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";

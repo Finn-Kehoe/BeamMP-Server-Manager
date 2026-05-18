@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/tauri";
+    import { invoke } from "@tauri-apps/api/core";
     import { showSettingsModal, showAuthModal, needsRestart } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";
     import { ServerSettings, ManagerSettings } from "./settings";

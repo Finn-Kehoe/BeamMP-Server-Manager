@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/tauri";
+    import { invoke } from "@tauri-apps/api/core";
     import type { MapMod } from "./mod";
     import MapListItem from "./MapListItem.svelte";
     import { onMount } from "svelte";

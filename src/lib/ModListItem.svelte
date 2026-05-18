@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { invoke } from "@tauri-apps/api/tauri";
+    import { invoke } from "@tauri-apps/api/core";
     import type { ContentMod } from "./mod";
     import { modlistHasBeenChanged, needsRestart } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";
