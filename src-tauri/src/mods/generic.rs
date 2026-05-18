@@ -95,7 +95,7 @@ pub fn add_mod(path: String, content_list: tauri::State<ContentList>, map_list: 
     let mut destination_path = std::env::current_dir()?;
     destination_path.push(format!("Resources/Client/{}", file_name));
 
-    if init_path.extension().unwrap() == "zip" {
+    if init_path.extension().unwrap_or_default() == "zip" {
         fs::rename(init_path, &destination_path)?;
     } else {
         return Err(error::Error::from(std::io::Error::new(std::io::ErrorKind::InvalidInput, "incorrect file type")));
@@ -133,13 +133,16 @@ fn get_list_of_mods() -> io::Result<HashMap<String, bool>> {
     if active_mods_path.is_dir() {
         let raw_mods_list = fs::read_dir(active_mods_path)?;
         for file in raw_mods_list {
-            let mod_name = file
-                .unwrap()
-                .file_name()
-                .to_str()
-                .unwrap()
-                .to_string();
-            mods_list.insert(mod_name, true);
+            let this_path = file.unwrap().path();
+            if this_path.extension().unwrap_or_default() == "zip" {
+                let mod_name = this_path
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string();
+                mods_list.insert(mod_name, false);
+            }
         }
     } else {
        return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "path to mods folder does not exist"));
@@ -153,13 +156,16 @@ fn get_list_of_mods() -> io::Result<HashMap<String, bool>> {
     if inactive_mods_path.is_dir() {
         let raw_mods_list = fs::read_dir(inactive_mods_path)?;
         for file in raw_mods_list {
-            let mod_name = file
-                .unwrap()
-                .file_name()
-                .to_str()
-                .unwrap()
-                .to_string();
-            mods_list.insert(mod_name, false);
+            let this_path = file.unwrap().path();
+            if this_path.extension().unwrap_or_default() == "zip" {
+                let mod_name = this_path
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string();
+                mods_list.insert(mod_name, false);
+            }
         }
     } else {
         // this folder does not exist in the regular configuration of the BeamMP Server, so if it does not already exist, we create it
