@@ -141,7 +141,7 @@ fn get_list_of_mods() -> io::Result<HashMap<String, bool>> {
                     .to_str()
                     .unwrap()
                     .to_string();
-                mods_list.insert(mod_name, false);
+                mods_list.insert(mod_name, true);
             }
         }
     } else {
