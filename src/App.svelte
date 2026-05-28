@@ -1,107 +1,107 @@
 <script lang="ts">
-  import AuthKeyCheckpoint from "./lib/AuthKeyCheckpoint.svelte";
-  import SettingsOverlay from "./lib/SettingsOverlay.svelte";
-  import ServerStatusBar from "./lib/ServerStatusBar.svelte";
-  import MapList from "./lib/MapList.svelte";
-  import ModList from "./lib/ModList.svelte";
+    import AuthKeyCheckpoint from "./lib/AuthKeyCheckpoint.svelte";
+    import SettingsOverlay from "./lib/SettingsOverlay.svelte";
+    import ServerStatusBar from "./lib/ServerStatusBar.svelte";
+    import MapList from "./lib/MapList.svelte";
+    import ModList from "./lib/ModList.svelte";
 
-  import { invoke } from "@tauri-apps/api/core";
-  import { onMount } from "svelte";
-  import { getCurrentWebview } from '@tauri-apps/api/webview';
-  import { modlistHasBeenChanged, maplistHasBeenChanged, showSettingsModal } from "./lib/stores"
-  import { ModType } from "./lib/mod";
+    import { invoke } from "@tauri-apps/api/core";
+    import { onMount } from "svelte";
+    import { getCurrentWebview } from '@tauri-apps/api/webview';
+    import { modlistHasBeenChanged, maplistHasBeenChanged, showSettingsModal } from "./lib/stores"
+    import { ModType } from "./lib/mod";
 
-  async function handleFiles(files: string[]) {
-    let thisModType: ModType;
-    for (let i = 0; i < files.length; i++) {
-      // we get path to file from file drop event
-      let thisPath = files[i];
-      await invoke("add_mod", { path: thisPath })
-        .then((modType: ModType) => thisModType = modType)
-        .catch((e) => {console.log("Error adding mod: ", e)});
-      
-      if (thisModType === ModType.Content) {
-        modlistHasBeenChanged.set(true);
-      } else if (thisModType === ModType.Map) {
-        maplistHasBeenChanged.set(true);
-      }
+    async function handleFiles(files: string[]) {
+        let thisModType: ModType;
+        for (let i = 0; i < files.length; i++) {
+            // we get path to file from file drop event
+            let thisPath = files[i];
+            await invoke("add_mod", { path: thisPath })
+                .then((modType: ModType) => thisModType = modType)
+                .catch((e) => {console.log("Error adding mod: ", e)});
+            
+            if (thisModType === ModType.Content) {
+                modlistHasBeenChanged.set(true);
+            } else if (thisModType === ModType.Map) {
+                maplistHasBeenChanged.set(true);
+            }
+        }
     }
-  }
 
-  function openSettingsOverlay() {
-    $showSettingsModal = true;
-  }
+    function openSettingsOverlay() {
+        $showSettingsModal = true;
+    }
 
-  onMount(async () => {
+    onMount(async () => {
 
-    const unlisten = await getCurrentWebview().onDragDropEvent((event) => {
-      if (event.payload.type === 'drop') {
-        console.log('Dropped files:', event.payload.paths);
-        handleFiles(event.payload.paths);
-      }
+        const unlisten = await getCurrentWebview().onDragDropEvent((event) => {
+            if (event.payload.type === 'drop') {
+                console.log('Dropped files:', event.payload.paths);
+                handleFiles(event.payload.paths);
+            }
+        });
+
+        return () => {
+            unlisten();
+        };
     });
-
-    return () => {
-      unlisten();
-    };
-  });
 </script>
 
 <main class="container">
-  <AuthKeyCheckpoint />
-  <SettingsOverlay />
-  <div class="server-status-bar">
-    <ServerStatusBar />
-  </div>
-
-  <div class="main-content">
-    <div class="content-lists">
-      <div class="mod-list list">
-        <p>Modded Content</p>
-        <ModList />
-      </div>
-      <div class="map-list list">
-        <p>Map Selection</p>
-        <MapList />
-      </div>
-      <div class="settings-button-wrapper">
-        <button class="settings-button" on:click={openSettingsOverlay}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#e3e3e3"><path d="M414.38-88q-12.92 0-23.69-8.65-10.77-8.66-13.23-22.35l-11.54-91.69q-13.15-4.77-31.92-14.66-18.77-9.88-30.38-21.03L218-210.46q-12.69 5.61-25.77 1.23-13.08-4.39-19.15-16.62l-67.16-120.3q-6.07-12.23-4.15-24.54 1.92-12.31 12.92-19.85l71.85-55q-.77-8.84-1.92-18.34-1.16-9.5-1.16-18.35 0-7.08 1.16-16.19 1.15-9.12 1.92-20.04l-70.85-53q-11-7.54-12.54-20.73-1.53-13.19 4.54-25.43l66.39-115q6.07-11.46 18.65-15.73 12.58-4.27 25.27.35l80.85 33.15q14.92-11.92 33.27-21.92 18.34-10 34.03-16.54L377.46-843q1.46-13.69 12.73-22.35 11.27-8.65 24.19-8.65h131.24q12.92 0 24.19 8.65 11.27 8.66 12.73 22.35l10.54 91.46q18 8.08 33.65 16.54 15.65 8.46 31.35 21.15L741.77-748q12.69-5.62 25.27-.85 12.58 4.77 19.65 16.23l66.39 115.77q6.07 12.23 4.15 25.04-1.92 12.81-12.92 20.35l-75.93 57.31q2.31 9.38 2.7 18.23.38 8.84.38 15.92 0 6.31-.77 15.15-.77 8.85-1.54 20.54l71.62 53.77q11 7.54 13.81 20.35 2.8 12.81-3.27 25.04l-65.62 118.53q-6.07 12.24-20.04 16.62-13.96 4.38-26.65-1.23l-85.92-35.92q-14.7 11.69-29.12 20.42-14.42 8.73-29.88 14.27L582.54-119q-2.46 13.69-13.23 22.35Q558.54-88 545.62-88H414.38Zm61.54-266q53.85 0 90.93-37.08 37.07-37.07 37.07-90.92t-37.07-90.92Q529.77-610 475.92-610q-53.07 0-90.54 37.08-37.46 37.07-37.46 90.92t37.46 90.92Q422.85-354 475.92-354Z"/></svg>
-        </button>
-      </div>
+    <AuthKeyCheckpoint />
+    <SettingsOverlay />
+    <div class="server-status-bar">
+        <ServerStatusBar />
     </div>
-  </div>
+
+    <div class="main-content">
+        <div class="content-lists">
+            <div class="mod-list list">
+                <p>Modded Content</p>
+                <ModList />
+            </div>
+            <div class="map-list list">
+                <p>Map Selection</p>
+                <MapList />
+            </div>
+            <div class="settings-button-wrapper">
+                <button class="settings-button" on:click={openSettingsOverlay}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#e3e3e3"><path d="M414.38-88q-12.92 0-23.69-8.65-10.77-8.66-13.23-22.35l-11.54-91.69q-13.15-4.77-31.92-14.66-18.77-9.88-30.38-21.03L218-210.46q-12.69 5.61-25.77 1.23-13.08-4.39-19.15-16.62l-67.16-120.3q-6.07-12.23-4.15-24.54 1.92-12.31 12.92-19.85l71.85-55q-.77-8.84-1.92-18.34-1.16-9.5-1.16-18.35 0-7.08 1.16-16.19 1.15-9.12 1.92-20.04l-70.85-53q-11-7.54-12.54-20.73-1.53-13.19 4.54-25.43l66.39-115q6.07-11.46 18.65-15.73 12.58-4.27 25.27.35l80.85 33.15q14.92-11.92 33.27-21.92 18.34-10 34.03-16.54L377.46-843q1.46-13.69 12.73-22.35 11.27-8.65 24.19-8.65h131.24q12.92 0 24.19 8.65 11.27 8.66 12.73 22.35l10.54 91.46q18 8.08 33.65 16.54 15.65 8.46 31.35 21.15L741.77-748q12.69-5.62 25.27-.85 12.58 4.77 19.65 16.23l66.39 115.77q6.07 12.23 4.15 25.04-1.92 12.81-12.92 20.35l-75.93 57.31q2.31 9.38 2.7 18.23.38 8.84.38 15.92 0 6.31-.77 15.15-.77 8.85-1.54 20.54l71.62 53.77q11 7.54 13.81 20.35 2.8 12.81-3.27 25.04l-65.62 118.53q-6.07 12.24-20.04 16.62-13.96 4.38-26.65-1.23l-85.92-35.92q-14.7 11.69-29.12 20.42-14.42 8.73-29.88 14.27L582.54-119q-2.46 13.69-13.23 22.35Q558.54-88 545.62-88H414.38Zm61.54-266q53.85 0 90.93-37.08 37.07-37.07 37.07-90.92t-37.07-90.92Q529.77-610 475.92-610q-53.07 0-90.54 37.08-37.46 37.07-37.46 90.92t37.46 90.92Q422.85-354 475.92-354Z"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
 </main>
 
 <style>
-  .list p {
-    margin: 0;
-    font-size: 1.3em;
-    font-weight: 550;
-  }
-  .content-lists {
-    display: flex;
-    justify-content: center;
-    padding: 2%;
-    padding-right: 0%;
-  }
-  .settings-button-wrapper {
-    justify-self: right;
-    margin-left: 4%;
-    width: 6%;
-    margin-top: auto;
-  }
-  .settings-button {
-    width: 100%;
-    margin-left: 30%;
-    padding: 0.25%;
-  }
-  .settings-button:hover {
-    background-color: #3d3d3d;
-    cursor: pointer;
-  }
-  .settings-button svg {
-    width: 100%;
-    height: 100%;
-  } 
+    .list p {
+        margin: 0;
+        font-size: 1.3em;
+        font-weight: 550;
+    }
+    .content-lists {
+        display: flex;
+        justify-content: center;
+        padding: 2%;
+        padding-right: 0%;
+    }
+    .settings-button-wrapper {
+        justify-self: right;
+        margin-left: 4%;
+        width: 6%;
+        margin-top: auto;
+    }
+    .settings-button {
+        width: 100%;
+        margin-left: 30%;
+        padding: 0.25%;
+    }
+    .settings-button:hover {
+        background-color: #3d3d3d;
+        cursor: pointer;
+    }
+    .settings-button svg {
+        width: 100%;
+        height: 100%;
+    } 
 </style>
