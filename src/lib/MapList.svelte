@@ -62,6 +62,10 @@
 <div>
     <ul>
         <!--Vanilla Maps-->
+        <div class="catagory-marker">
+            <p>Vanilla</p>
+            <hr />
+        </div>
         <svelte:component this={VMapListItem} internal_name={"gridmap_v2"} external_name={"Gridmap v2"}/>
         <svelte:component this={VMapListItem} internal_name={"johnson_valley"} external_name={"Johnson Valley"}/>
         <svelte:component this={VMapListItem} internal_name={"automation_test_track"} external_name={"Automation Test Track"}/>
@@ -77,6 +81,12 @@
         <svelte:component this={VMapListItem} internal_name={"driver_training"} external_name={"ETK Driver Experience Center"}/>
         <svelte:component this={VMapListItem} internal_name={"derby"} external_name={"Derby Arenas"}/>
         <!--Modded Maps-->
+        {#if modMaps.length > 0}
+            <div class="catagory-marker">
+                <p>Modded</p>
+                <hr />
+            </div>
+        {/if}
         {#each modMaps as item}
             <svelte:component this={MapListItem} modObject={item}/>
         {/each}
@@ -105,5 +115,21 @@
     }
     ::-webkit-scrollbar-thumb:hover {
         background-color: #3d3d3d;
+    }
+    .catagory-marker p {
+        margin: 2%;
+        margin-bottom: 0;
+        font-weight: 550;
+    }
+    .catagory-marker hr {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        display: block;
+        justify-self: center;
+        height: 0;
+        width: 75%;
+        border-bottom: 2px solid #3d3d3d;
+        margin-bottom: 4%;
     }
 </style>
