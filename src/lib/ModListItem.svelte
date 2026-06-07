@@ -111,12 +111,12 @@
         justify-self: flex-end;
         align-self: flex-end;
         padding: 0%;
-        width: 75%;
-        height: 50%;
+        width: 35px;
+        height: 35px;
     }
     .delete.button svg {
         color: inherit;
-        height: 75%;
+        height: 100%;
         
     }
     .delete.button:hover, .delete.button svg:hover {

@@ -95,13 +95,13 @@
     }
     .delete {
         padding: 0%;
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
     }
     .delete.button svg {
         position: relative;
         color: inherit;
-        height: 75%;
+        height: 100%;
     }
     .delete.button:hover, .delete.button svg:hover {
         color: rgb(252, 77, 77);
