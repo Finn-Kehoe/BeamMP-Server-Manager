@@ -41,7 +41,7 @@
   },
   "productName": "BeamMP-Server-Manager",
   "mainBinaryName": "BeamMP-Server-Manager",
-  "version": "0.0.6-1",
+  "version": "0.0.7",
   "identifier": "com.beammp.server.manager",
   "plugins": {},
   "app": {
