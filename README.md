@@ -25,13 +25,13 @@ If you already have a BeamMP server set up and wish to integrate the server mana
 There are two available files for download for Windows.
 
 - `BeamMP-Server-Manager.exe`: The recommended file to download. A portable executable that can be drag and dropped and run anywhere.
-- `BeamMP-Server-Manager_0.0.6-1_x64_en-US.msi`: An installer for the executable with a slightly smaller file size.
+- `BeamMP-Server-Manager_0.0.7_x64_en-US.msi`: An installer for the executable with a slightly smaller file size.
 
 ### Linux
 
 The only supported Linux distributions are Ubuntu and Debian. Both require `liblua5.3` to be installed to work correctly.
 
-- `BeamMP-Server-Manager_0.0.6-1_amd64.deb`: An installer for the excecutable. Works on Debian-based distributions (ex. Ubuntu).
+- `BeamMP-Server-Manager_0.0.7_amd64.deb`: An installer for the excecutable. Works on Debian-based distributions (ex. Ubuntu).
 
 ### Integrating With Existing Server
 
