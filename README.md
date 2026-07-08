@@ -1,8 +1,8 @@
 # BeamMP Server Manager
 
-BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in small-scale, self-hosted servers. In the manager, you can add and remove mods (vehicles and maps), as well as select the current map. It has no relation to and is not endorsed in any way by the creators of the BeamMP mod or the BeamMP Server.
+BeamMP Server Manager gives a UI to the BeamMP server. It is intended for use in small-scale, self-hosted servers. In the manager, you can add and remove all types of modded content, easily select the map to be played, and conveniently change basic server settings. It has no relation to and is not endorsed in any way by the creators of the BeamMP mod or the BeamMP Server.
 
-<p align="center"><img src="ui_showcase.png" width="75%" /></p>
+<p align="center"><img src="ui_showcase.png" alt="Showcase of the Manager's UI" width="75%" /></p>
 
 ## Installation
 
@@ -13,9 +13,9 @@ For the server to be connectable to people outside of your local network, it mus
 If you already have a BeamMP server set up and wish to integrate the server manager with it, follow the instructions [here](#integrating-with-existing-server).
 
 1. Download the executable for your operating system (outlined below) from the releases tab.
-2. Place the file in a folder on your computer.
+2. Place it in a folder somewhere convenient on your computer.
 3. Generate an AuthKey. A guide can be found [here](https://docs.beammp.com/server/create-a-server/#2-obtaining-an-authentication-key) (only follow steps in section 2).
-4. Open the manager executable. (A terminal window may open and then close after a few seconds. This is normal.)
+4. Run the manager executable. (A terminal window may open and then close after a few seconds. This is normal.)
 5. Copy your generated AuthKey.
 6. Paste your AuthKey where prompted.
 7. You can now click the `Start` button and the server will start normally.
@@ -31,12 +31,12 @@ There are two available files for download for Windows.
 
 The only supported Linux distributions are Ubuntu and Debian. Both require `liblua5.3` to be installed to work correctly.
 
-- `BeamMP-Server-Manager_0.0.7_amd64.deb`: An installer for the excecutable. Works on Debian-based distributions (ex. Ubuntu).
+- `BeamMP-Server-Manager_0.0.7_amd64.deb`: An installer for the executable. Works on Debian-based distributions (ex. Ubuntu).
 
 ### Integrating With Existing Server
 
 1. Download the manager executable for your OS.
-2. Place the manager executable in the folder where your server executable is.
+2. Place the manager executable in the directory where your server executable is.
 3. Run the manager. Everything will integrate automatically.
 
 ## Usage
@@ -90,7 +90,7 @@ Click [here](https://docs.beammp.com/server/create-a-server/#6-how-to-join-your-
 
 ## Updating The Server
 
-If automatic updating is enabled in the settings, the BeamMP Server will update as soon as a new version is detected. A new version is checked for each time the manager is started.
+If automatic updating is enabled in the settings (it is by default), the BeamMP Server will update as soon as a new version is detected. A new version is checked for each time the manager is started.
 
 ## Building from Source
 
@@ -109,5 +109,7 @@ If automatic updating is enabled in the settings, the BeamMP Server will update 
 The executable can be found (from project root) at `src-tauri/target/release/`. It is called `BeamMP-Server-Manager.exe` on Windows and `BeamMP-Server-Manager` on Linux. It's portable, so you can take it from here and place it wherever you like before using. To set up and use the manager, refer to the [Installation](#installation) section.
 
 ## Additional Information
+
+If you encounter any problems while using the manager, please create an issue in the repository. There's no template, but please include any information you feel may be relevant. I'll do my best to resolve any issues that come to my attention.
 
 For additional information about BeamMP and the BeamMP Server itself, check out the [BeamMP Website](https://www.beammp.com/) and the [BeamMP Server Github Repo](https://github.com/beammp/beammp-server).
