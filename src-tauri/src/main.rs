@@ -13,7 +13,9 @@ mod update;
 mod util;
 
 fn main() {
-    update::auto_update_server();
+    if settings::manager_settings::_read_manager_settings().unwrap().auto_update {
+        update::_check_and_update_server();
+    }
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .manage(server_control::Server::start())
@@ -47,6 +49,7 @@ fn main() {
             settings::server_settings::update_server_config,
             settings::manager_settings::read_manager_settings,
             settings::manager_settings::update_manager_config,
+            update::check_and_update_server,
         ])
         .build(tauri::generate_context!())
         .expect("error building tauri app")

@@ -2,8 +2,6 @@ use std::process::Command;
 use std::io::{self, Write};
 use std::fs;
 
-use crate::settings::manager_settings;
-
 use reqwest;
 use serde_json;
 use regex::Regex;
@@ -181,25 +179,29 @@ fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn auto_update_server() {
-    if manager_settings::_read_manager_settings().unwrap().auto_update {
-        let current_version = match get_current_server_version() {
-            Ok(version) => version,
-            Err(e) => {eprintln!("Error: {:?}, {}", e.kind(), e.to_string()); return;}
-        };
-        let latest_version = match get_latest_server_version() {
-            Ok(version) => version,
+pub fn _check_and_update_server() {
+
+    let current_version = match get_current_server_version() {
+        Ok(version) => version,
+        Err(e) => {eprintln!("Error: {:?}, {}", e.kind(), e.to_string()); return;}
+    };
+
+    let latest_version = match get_latest_server_version() {
+        Ok(version) => version,
+        Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
+    };
+
+    if needs_update(current_version.clone(), latest_version.clone()) {
+        match download_latest_server() {
+            Ok(_) => {println!("Server Updated: {} -> {}", current_version, latest_version); return;},
             Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
         };
-        if needs_update(current_version.clone(), latest_version.clone()) {
-            match download_latest_server() {
-                Ok(_) => {println!("Server Updated: {} -> {}", current_version, latest_version); return;},
-                Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
-            };
-        }
-    } else {
-        return
     }
+}
+
+#[tauri::command]
+pub fn check_and_update_server() {
+    _check_and_update_server();
 }
 
 #[cfg(test)]
