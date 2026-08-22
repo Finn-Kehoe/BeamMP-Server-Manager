@@ -34,6 +34,12 @@
         await invoke("user_open_config_file");
     }
 
+    async function updateServer() {
+        await invoke("close_server");
+        needsRestart.set(0);
+        await invoke("check_and_update_server");
+    }
+
     onMount(() => {
         getServerSettings();
         getManagerSettings();
@@ -96,9 +102,9 @@
                 <div class="setting-title">
                     <h4>Authkey</h4>
                 </div>
-                <input class=input bind:value={tempAuthKey} on:blur={sendSettingsChange}/>
+                <input class="input" bind:value={tempAuthKey} on:blur={sendSettingsChange}/>
             </div>
-            <hr class="body-div" />
+            <hr class="body-div thick" />
             <div class="num private-server-setting">
                 <div class="setting-title">
                     <h4>Private</h4>
@@ -218,24 +224,24 @@
     .num div.setting-title h4 {
         margin: auto + 1%;
     }
+    .thick {
+        border-top: 2px solid #3d3d3d;
+    }
     .input {
         width: 85%;
         padding-left: 1em;
         padding-right: 1em;
         text-align: center;
+        margin-left: auto;
     }
     .num-input {
         padding-left: 2%;
         padding-right: 2%;
         width: 10%;
-        margin-left: 7%;
+        margin-left: auto;
         text-align: center;
     }
-    .switch {
-        margin-left: 5%;
-    }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
@@ -246,53 +252,54 @@
         margin-left: auto;
     }
     .switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+        margin-left: auto;
     }
     .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+        opacity: 0;
+        width: 0;
+        height: 0;
     }
     .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #1a1a1a;
-    -webkit-transition: .4s;
-    transition: .4s;
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #1a1a1a;
+        -webkit-transition: .4s;
+        transition: .4s;
     }
     .slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
     }
     input:checked + .slider {
-    background-color: #ff7722;
+        background-color: #ff7722;
     }
     input:focus + .slider {
-    box-shadow: 0 0 1px #ff7722;
+        box-shadow: 0 0 1px #ff7722;
     }
     input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
     }
     .slider.round {
-    border-radius: 34px;
+        border-radius: 34px;
     }
     .slider.round:before {
-    border-radius: 50%;
+        border-radius: 50%;
     } 
 </style>
