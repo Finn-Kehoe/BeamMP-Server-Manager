@@ -6,6 +6,28 @@ use reqwest;
 use serde_json;
 use regex::Regex;
 
+#[derive(serde::Serialize)]
+pub enum UpdateResult {
+    Unnecessary,
+    Success,
+    Error,
+}
+
+#[cfg(not(target_os = "windows"))]
+enum LinuxDistro {
+    Ubuntu,
+    Debian,
+    Other,
+}
+
+#[cfg(not(target_os = "windows"))]
+#[allow(non_camel_case_types)]
+enum CPUArchitecture {
+    x86_64,
+    arm,
+    Other,
+}
+
 fn extract_version_from_string(input: String) -> Option<String> {
     let re = Regex::new(r"\d+.\d+.\d+").unwrap();
     let re_output = re.captures(&input)?;
@@ -112,6 +134,8 @@ fn needs_update(local_version: String, latest_version: String) -> bool {
     needs_update
 }
 
+// linux version
+#[cfg(not(target_os = "windows"))]
 fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     // creating http client
     let client = reqwest::blocking::Client::builder()
@@ -127,28 +151,50 @@ fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
     let release_assets = &json_full_release["assets"];
 
     let mut download_link = String::new();
-    let is_linux = !cfg!(target_os = "windows");
-    let mut distro_info = String::new();
-    if is_linux {
-        distro_info = String::from_utf8(Command::new("cat").args(["/etc/issue"]).output().expect("").stdout).unwrap();
-    }
+    let distro_info = String::from_utf8(Command::new("cat") // distro name
+    .args(["/etc/issue"])
+    .output()
+    .expect("").stdout).unwrap();
+    
+    let architecture_info = String::from_utf8(Command::new("uname") // cpu architecture
+    .args(["-m"])
+    .output()
+    .expect("").stdout).unwrap();
+
+    let this_distro = if distro_info.contains("Ubuntu") {LinuxDistro::Ubuntu}
+    else if distro_info.contains("Debian") {LinuxDistro::Debian} 
+    else {LinuxDistro::Other};
+
+    let this_architecture = if architecture_info.contains("x86_64") {CPUArchitecture::x86_64}
+    else if architecture_info.contains("arm") {CPUArchitecture::arm}
+    else {CPUArchitecture::Other};
+
     // looping through each asset until the correct one for the users OS is found
     for asset in release_assets.as_array().unwrap() {
-        if !is_linux {
-            if asset["name"].to_string().contains("BeamMP-Server.exe") {
-                download_link = asset["browser_download_url"].as_str().unwrap().to_string();
-            }
-        } else {
-            if distro_info.contains("Ubuntu") {
-                if asset["name"].to_string().contains("ubuntu") && asset["name"].to_string().contains("x86_64") {
-                    download_link = asset["browser_download_url"].as_str().unwrap().to_string();
-                }
-            } else if distro_info.contains("Debian") {
-                if asset["name"].to_string().contains("debian") && asset["name"].to_string().contains("x86_64") {
-                    download_link = asset["browser_download_url"].as_str().unwrap().to_string();
-                }
-            } else {
-                panic!("Unsupported OS");
+        let asset_name = asset["name"].to_string();
+        if asset_name.contains("BeamMP-Server") {
+            match this_distro {
+                LinuxDistro::Ubuntu => match this_architecture {
+                    CPUArchitecture::x86_64 => if asset_name.contains("ubuntu") && asset_name.contains("x86_64") {
+                        download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+                    },
+                    CPUArchitecture::arm => if asset_name.contains("ubuntu") && asset_name.contains("arm") {
+                        download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+                    },
+                    CPUArchitecture::Other => panic!("Unsupported CPU architecture!"),
+                },
+
+                LinuxDistro::Debian => match this_architecture {
+                    CPUArchitecture::x86_64 => if asset_name.contains("debian") && asset_name.contains("x86_64") {
+                        download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+                    },
+                    CPUArchitecture::arm => if asset_name.contains("debian") && asset_name.contains("arm") {
+                        download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+                    },
+                    CPUArchitecture::Other => panic!("Unsupported CPU architecture!"),
+                },
+                
+                LinuxDistro::Other => panic!("Unsupported OS!"),
             }
         }
     }
@@ -160,48 +206,86 @@ fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
 
     // creating the path for the server file
     let mut server_path = std::env::current_dir()?;
-    if cfg!(target_os = "windows") {
-        server_path.push("BeamMP-Server.exe");
-    } else {
-        server_path.push("BeamMP-Server-linux");
-    }
+    server_path.push("BeamMP-Server-linux");
+
     // writing downloaded data to server file
     let mut new_server = fs::File::create(server_path)?;
     new_server.write_all(&downloaded_file)?;
 
-    // making the BeamMP-Server file executable on Linux
-    if is_linux {
-        Command::new("chmod")
-            .args(["777", "BeamMP-Server-linux"])
-            .spawn()?;
-    }
+    // making the BeamMP-Server file executable
+    Command::new("chmod")
+        .args(["777", "BeamMP-Server-linux"])
+        .spawn()?;
 
     Ok(())
 }
 
-pub fn _check_and_update_server() {
+// windows version
+#[cfg(target_os = "windows")]
+fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
+    // creating http client
+    let client = reqwest::blocking::Client::builder()
+        .user_agent("BeamMP-Server-Manager") // user agent is required for github api
+        .build()?;
+    // getting latest server release data
+    let full_release = client.get("https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest")
+        .send()?
+        .text()?;
+    // converting response data to json
+    let json_full_release: serde_json::Value = serde_json::from_str(&full_release)?;
+    // getting the assets array from the main json
+    let release_assets = &json_full_release["assets"];
+
+    let mut download_link = String::new();
+    // looping through each asset until the correct one for the users OS is found
+    for asset in release_assets.as_array().unwrap() {
+        let asset_name = asset["name"].to_string();
+        if asset_name.contains("BeamMP-Server.exe") {
+            download_link = asset["browser_download_url"].as_str().unwrap().to_string();
+        }
+    }
+
+    // downloading file from previously found link
+    let downloaded_file = client.get(download_link)
+        .send()?
+        .bytes()?;
+
+    // creating the path for the server file
+    let mut server_path = std::env::current_dir()?;
+    server_path.push("BeamMP-Server.exe");
+
+    // writing downloaded data to server file
+    let mut new_server = fs::File::create(server_path)?;
+    new_server.write_all(&downloaded_file)?;
+
+    Ok(())
+}
+
+pub fn _check_and_update_server() -> UpdateResult {
 
     let current_version = match get_current_server_version() {
         Ok(version) => version,
-        Err(e) => {eprintln!("Error: {:?}, {}", e.kind(), e.to_string()); return;}
+        Err(e) => {eprintln!("Error: {:?}, {}", e.kind(), e.to_string()); return UpdateResult::Error;}
     };
 
     let latest_version = match get_latest_server_version() {
         Ok(version) => version,
-        Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
+        Err(e) => {eprintln!("Error: {:?}", e.to_string()); return UpdateResult::Error;}
     };
 
     if needs_update(current_version.clone(), latest_version.clone()) {
         match download_latest_server() {
-            Ok(_) => {println!("Server Updated: {} -> {}", current_version, latest_version); return;},
-            Err(e) => {eprintln!("Error: {:?}", e.to_string()); return;}
+            Ok(_) => {println!("Server Updated: {} -> {}", current_version, latest_version); return UpdateResult::Success;},
+            Err(e) => {eprintln!("Error: {:?}", e.to_string()); return UpdateResult::Error;}
         };
+    } else {
+        UpdateResult::Unnecessary
     }
 }
 
 #[tauri::command]
-pub fn check_and_update_server() {
-    _check_and_update_server();
+pub fn check_and_update_server() -> UpdateResult {
+    _check_and_update_server()
 }
 
 #[cfg(test)]
