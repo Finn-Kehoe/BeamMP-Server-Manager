@@ -1,6 +1,6 @@
 use std::process::{Command, Child};
 use std::io::ErrorKind;
-use std::sync::Mutex;
+use std::sync::{Mutex, LazyLock};
 
 use crate::util::error;
 use crate::settings::manager_settings;
@@ -9,6 +9,10 @@ use regex::Regex;
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
+
+static STATUS_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\[INFO\] ALL SYSTEMS STARTED SUCCESSFULLY, EVERYTHING IS OKAY").unwrap() 
+});
 
 #[derive(serde::Serialize)]
 pub enum ServerStatus {
@@ -119,8 +123,7 @@ pub fn check_server_status(server: tauri::State<Server>) -> Result<ServerStatus,
         if log_file_path.is_file() {
             let log_contents_string: String = std::fs::read_to_string(&log_file_path)?;
 
-            let re = Regex::new(r"\[INFO\] ALL SYSTEMS STARTED SUCCESSFULLY, EVERYTHING IS OKAY").unwrap();
-            if re.is_match(&log_contents_string) {
+            if STATUS_REGEX.is_match(&log_contents_string) {
                 *server.startup_is_finished.lock().unwrap() = true;
                 return Ok(ServerStatus::Running);
             } else {
