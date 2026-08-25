@@ -10,3 +10,9 @@ export class ManagerSettings {
     auto_update: boolean;
     show_server_terminal: boolean;
 }
+
+export enum UpdateResult {
+    Unnecessary,
+    Success,
+    Error,
+}
