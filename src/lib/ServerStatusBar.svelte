@@ -14,8 +14,7 @@
 
         async function updateServerStatus() {
             await invoke("check_server_status")
-                .then((status: ServerStatus) => currentServerStatus = status)
-                .catch((_) => currentServerStatus = ServerStatus.Stopped);
+                .then((status: ServerStatus) => currentServerStatus = status, (_) => currentServerStatus = ServerStatus.Stopped);
 
             switch (currentServerStatus) {
                 case ServerStatus.Stopped:
