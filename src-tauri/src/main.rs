@@ -18,6 +18,7 @@ fn main() {
     }
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(server_control::Server::start())
         // wait_on_first_startup is called in a manage function so it can be executed between server startup and when the app uses the servers files
         // nothing is actually being managed
