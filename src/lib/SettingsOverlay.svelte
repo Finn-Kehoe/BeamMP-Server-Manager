@@ -2,7 +2,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { showSettingsModal, showAuthModal, needsRestart } from "./stores";
     import ModalTemplate from "./ModalTemplate.svelte";
-    import { ServerSettings, ManagerSettings } from "./settings";
+    import { ServerSettings, ManagerSettings, UpdateResult } from "./settings";
     import { onMount } from "svelte";
 
     let serverSettings: ServerSettings = {server_name: "", auth_key: "", is_private: true, max_cars: 0, max_players: 0};
@@ -34,10 +34,19 @@
         await invoke("user_open_config_file");
     }
 
+    let updateResponseText = "";
+
     async function updateServer() {
+        updateResponseText = "..."
         await invoke("close_server");
         needsRestart.set(0);
-        await invoke("check_and_update_server");
+        await invoke("check_and_update_server").then((response: UpdateResult) => {
+            switch (response) {
+                case UpdateResult.Unnecessary: updateResponseText = "Server up to Date!"; break;
+                case UpdateResult.Success: updateResponseText = "Server Updated!"; break;
+                case UpdateResult.Error: updateResponseText = "Error Updating Server!"; break;
+            }
+        });
     }
 
     onMount(() => {
@@ -138,6 +147,10 @@
                     <span class="slider round"></span>
                 </label>
             </div>
+            <div class = "num manualupdatebutton-setting">
+                <button class="setting-button button" on:click={updateServer}><h4>Update Server Now</h4></button>
+                <p class="update-text">{updateResponseText}</p>
+            </div>
             <hr class="body-div" />
             <div class="num showserverterminal-setting">
                 <div class="setting-title">
@@ -233,6 +246,7 @@
         padding-right: 1em;
         text-align: center;
         margin-left: auto;
+        background-color: #1a1a1a;
     }
     .num-input {
         padding-left: 2%;
@@ -240,10 +254,22 @@
         width: 10%;
         margin-left: auto;
         text-align: center;
+        background-color: #1a1a1a;
     }
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
+    }
+    .manualupdatebutton-setting {
+        padding-top: 0px !important;
+    }
+    .setting-button h4 {
+        margin: 0;
+    }
+    .update-text {
+        margin-left: auto;
+        margin-top: 0;
+        margin-bottom: 0;
     }
     .bottom-buttons {
         display: flex;

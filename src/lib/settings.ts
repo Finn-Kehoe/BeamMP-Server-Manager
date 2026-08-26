@@ -12,7 +12,7 @@ export class ManagerSettings {
 }
 
 export enum UpdateResult {
-    Unnecessary,
-    Success,
-    Error,
+    Unnecessary = "Unnecessary",
+    Success = "Success",
+    Error = "Error",
 }
