@@ -152,22 +152,22 @@ fn download_latest_server() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut download_link = String::new();
     let distro_info = String::from_utf8(Command::new("cat") // distro name
-    .args(["/etc/issue"])
-    .output()
-    .expect("").stdout).unwrap();
+        .args(["/etc/issue"])
+        .output()
+        .expect("").stdout).unwrap();
     
     let architecture_info = String::from_utf8(Command::new("uname") // cpu architecture
-    .args(["-m"])
-    .output()
-    .expect("").stdout).unwrap();
+        .args(["-m"])
+        .output()
+        .expect("").stdout).unwrap();
 
     let this_distro = if distro_info.contains("Ubuntu") {LinuxDistro::Ubuntu}
-    else if distro_info.contains("Debian") {LinuxDistro::Debian} 
-    else {LinuxDistro::Other};
+        else if distro_info.contains("Debian") {LinuxDistro::Debian} 
+        else {LinuxDistro::Other};
 
     let this_architecture = if architecture_info.contains("x86_64") {CPUArchitecture::x86_64}
-    else if architecture_info.contains("arm") {CPUArchitecture::arm}
-    else {CPUArchitecture::Other};
+        else if architecture_info.contains("arm") {CPUArchitecture::arm}
+        else {CPUArchitecture::Other};
 
     // looping through each asset until the correct one for the users OS is found
     for asset in release_assets.as_array().unwrap() {
