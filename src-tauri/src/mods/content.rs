@@ -66,22 +66,14 @@ pub fn get_mod_content(content_list: tauri::State<ContentList>) -> Vec<Content> 
 }
 
 fn get_info_file_paths<'a, T: Iterator<Item = &'a str>>(file_structure: &mut T) -> Vec<String> {
-    let mut proto_paths: Vec<String> = Vec::new();
-    for file in file_structure {
-        if file.contains("info.json") {
-            proto_paths.push(String::from(file));
-        }
-    }
+    let valid_paths: Vec<String> = file_structure
+        // only info paths we want are those related to contents of the mod, not the mod itself
+        .filter(|x| x.contains("info.json") && x.starts_with("vehicles"))
+        .map(|x| String::from(x))
+        .collect();
 
-    let mut final_paths: Vec<String> = Vec::new();
-    for path in proto_paths.into_iter() {
-        // weeding out potential info.jsons in folders not related to actual content
-        if path.starts_with("vehicles") {
-            final_paths.push(path);
-        }
-    }
+    valid_paths
 
-    final_paths
 }
 
 fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String) -> io::Result<InfoJSON> {
