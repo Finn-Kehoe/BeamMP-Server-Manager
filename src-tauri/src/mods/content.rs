@@ -65,15 +65,18 @@ pub fn get_mod_content(content_list: tauri::State<ContentList>) -> Vec<Content> 
     content_list.content_mods.lock().unwrap().to_vec()
 }
 
-fn get_info_file_paths<'a, T: Iterator<Item = &'a str>>(file_structure: &mut T) -> Vec<String> {
+fn get_info_file_paths<'a, T: Iterator<Item = &'a str>>(file_structure: &mut T) -> Option<Vec<String>> {
     let valid_paths: Vec<String> = file_structure
         // only info paths we want are those related to contents of the mod, not the mod itself
         .filter(|x| x.contains("info.json") && x.starts_with("vehicles"))
         .map(|x| String::from(x))
         .collect();
 
-    valid_paths
-
+    if valid_paths.is_empty() {
+        None
+    } else {
+        Some(valid_paths)
+    }
 }
 
 fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String) -> io::Result<InfoJSON> {
@@ -91,14 +94,18 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String)
 pub fn examine_content_mod(zip_object: &mut zip::ZipArchive<std::fs::File>) -> Vec<InnerContent> {
     let mut contents_vec: Vec<InnerContent> = Vec::new();
     let mut file_structure = zip_object.file_names();
-    let info_paths = get_info_file_paths(&mut file_structure);
-    drop(file_structure);
+    match get_info_file_paths(&mut file_structure) {
+        Some(paths) => {
+            drop(file_structure);
+            for path in paths.iter() {
+                let raw_info = read_info_file(zip_object, path.to_string()).unwrap();
+                let internal_name = extract_name_from_info_path(path.to_string());
 
-    for path in info_paths.iter() {
-        let raw_info = read_info_file(zip_object, path.to_string()).unwrap();
-        let internal_name = extract_name_from_info_path(path.to_string());
-
-        contents_vec.push(InnerContent::new(internal_name, String::new(), raw_info.authors, raw_info.brand, raw_info.name))
+                contents_vec.push(InnerContent::new(internal_name, String::new(), raw_info.authors, raw_info.brand, raw_info.name))
+            }
+        }
+        // create blank inner content even if we cant find info file(s) so that we can display mod even if it is differently formatted
+        None => contents_vec.push(InnerContent::new(String::new(), String::new(), String::new(), String::new(), String::new()))
     }
 
     contents_vec
