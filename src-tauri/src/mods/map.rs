@@ -4,10 +4,9 @@ use std::io::{self, prelude::*};
 use crate::mods::generic::*;
 use crate::util::json;
 
-pub struct ProtoMap {
-    pub internal_name: String,
-    pub external_name: String,
-    pub authors: String,
+struct InfoJSON {
+    external_name: String,
+    authors: String,
 }
 
 #[derive(serde::Serialize, Clone)]
@@ -63,26 +62,24 @@ fn find_internal_mod_name<'a, T: Iterator<Item = &'a str>>(file_structure: &mut 
     extract_name_from_info_path(full_internal_name.to_string())
 }
 
-fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String) -> io::Result<ProtoMap> {
+fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String) -> io::Result<InfoJSON> {
     let mut info_file = zip_object.by_name(&path)?;
     let mut raw_json = String::new();
     info_file.read_to_string(&mut raw_json)?;
 
-    Ok(ProtoMap {   
-        internal_name: String::new(), // internal name is determined later
+    Ok(InfoJSON {   
         external_name: json::get_value_from_json(&raw_json, String::from("title")),
         authors: json::get_value_from_json(&raw_json, String::from("authors")), 
     })
 }
 
-pub fn examine_map_mod(zip_object: &mut zip::ZipArchive<std::fs::File>) -> ProtoMap {
+pub fn examine_map_mod(is_active: bool, file_name: String, zip_object: &mut zip::ZipArchive<std::fs::File>) -> Map {
     let mut file_structure = zip_object.file_names();
     let internal_name = find_internal_mod_name(&mut file_structure);
     drop(file_structure);
 
     let info_file_path = format!("levels/{}/info.json", &internal_name);
-    let mut this_protomap = read_info_file(zip_object, info_file_path).unwrap();
-    this_protomap.internal_name = internal_name;
+    let raw_info = read_info_file(zip_object, info_file_path).unwrap();
 
-    this_protomap
+    Map::new(is_active, file_name, internal_name, raw_info.external_name, raw_info.authors)
 }

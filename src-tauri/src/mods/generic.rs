@@ -195,7 +195,7 @@ pub fn extract_name_from_info_path(path: String) -> String {
     // get index of each slash (/)
     let slash_indices: Vec<_> = path.match_indices("/").map(|(i, _)| i ).collect();
     // the name is between the first two slashes
-    let name = &path[slash_indices[0] + 1..slash_indices[1]];
+    let name = &path[(slash_indices[0] + 1)..slash_indices[1]];
 
     String::from(name)
 }
@@ -217,13 +217,11 @@ fn examine_mod(mod_name: String, is_active: bool, content_list: &tauri::State<Co
     drop(file_structure);
 
     if mod_type == ModType::Content {
-        let inner_contents = examine_content_mod(&mut zip_archive);
-        let content_mod = Content::new(is_active, mod_name, inner_contents);
+        let content_mod = examine_content_mod(is_active, mod_name, &mut zip_archive);
         content_list.content_mods.lock().unwrap().push(content_mod);
 
     } else if mod_type == ModType::Map {
-        let protomap = examine_map_mod(&mut zip_archive);
-        let map_mod = Map::new(is_active, mod_name, protomap.internal_name, protomap.external_name, protomap.authors);
+        let map_mod = examine_map_mod(is_active, mod_name, &mut zip_archive);
         map_list.maps.lock().unwrap().push(map_mod);
     }
 

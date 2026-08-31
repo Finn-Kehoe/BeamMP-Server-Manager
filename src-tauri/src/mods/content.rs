@@ -91,7 +91,7 @@ fn read_info_file(zip_object: &mut zip::ZipArchive<std::fs::File>, path: String)
     })
 }
 
-pub fn examine_content_mod(zip_object: &mut zip::ZipArchive<std::fs::File>) -> Vec<InnerContent> {
+pub fn examine_content_mod(is_active: bool, file_name: String, zip_object: &mut zip::ZipArchive<std::fs::File>) -> Content {
     let mut contents_vec: Vec<InnerContent> = Vec::new();
     let mut file_structure = zip_object.file_names();
     match get_info_file_paths(&mut file_structure) {
@@ -108,5 +108,5 @@ pub fn examine_content_mod(zip_object: &mut zip::ZipArchive<std::fs::File>) -> V
         None => contents_vec.push(InnerContent::new(String::new(), String::new(), String::new(), String::new(), String::new()))
     }
 
-    contents_vec
+    Content::new(is_active, file_name, contents_vec)
 }
