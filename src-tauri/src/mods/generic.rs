@@ -1,5 +1,6 @@
 use std::io;
 use std::collections::HashMap;
+use std::sync::MutexGuard;
 use std::fs;
 
 use crate::mods::{content::*, map::*};
@@ -17,20 +18,32 @@ pub trait GenericMod {
     fn file_name(&self) -> String;
 }
 
-// top level function will only ever be used by content mods
-#[tauri::command]
-pub fn change_mod_activation(file_name: String, content_list: tauri::State<ContentList>) {
-    let this_mod: &mut Content;
-    let mut this_list = content_list.content_mods.lock().unwrap();
-    match this_list.iter_mut().find(|x| x.file_name == file_name) {
-        Some(found_mod) => this_mod = found_mod,
-        None => return,
+struct FindResult<'a> {
+    pointer: &'a mut dyn GenericMod,
+    mod_type: ModType,
+}
+
+fn find_mod_by_file_name<'a>(file_name: String, content_list: &'a mut MutexGuard<Vec<Content>>, map_list: &'a mut MutexGuard<Vec<Map>>) -> Option<FindResult<'a>> {
+    return match content_list.iter_mut().find(|x| x.file_name == file_name) {
+        Some(found_mod) => Some(FindResult {pointer: found_mod, mod_type: ModType::Content}),
+        None => match map_list.iter_mut().find(|x| x.file_name == file_name) {
+            Some(found_mod) => Some(FindResult {pointer: found_mod, mod_type: ModType::Map}),
+            None => None,
+        },
     }
+}
+
+#[tauri::command]
+pub fn change_mod_activation(file_name: String, content_list: tauri::State<ContentList>, map_list: tauri::State<MapList>) {
+    let mut _content_list = content_list.content_mods.lock().unwrap();
+    let mut _map_list = map_list.maps.lock().unwrap();
+    let found_object = find_mod_by_file_name(file_name, &mut _content_list, &mut _map_list).unwrap();
+    let this_mod = found_object.pointer;
 
     _change_mod_activation(this_mod);
 }
 
-pub fn _change_mod_activation<T: GenericMod>(this_mod: &mut T) {
+pub fn _change_mod_activation(this_mod: &mut dyn GenericMod) {
 
     let current_dir = std::env::current_dir().unwrap().clone();
 
@@ -54,15 +67,9 @@ pub fn _change_mod_activation<T: GenericMod>(this_mod: &mut T) {
 pub fn delete_mod(file_name: String, content_list: tauri::State<ContentList>, map_list: tauri::State<MapList>) {
     let mut _content_list = content_list.content_mods.lock().unwrap();
     let mut _map_list = map_list.maps.lock().unwrap();
-    let this_mod: &dyn GenericMod;
-    let mod_type: ModType;
-    match _content_list.iter().find(|x| x.file_name == file_name) {
-        Some(found_mod) => {this_mod = found_mod; mod_type = ModType::Content;},
-        None => match _map_list.iter().find(|x| x.file_name == file_name) {
-            Some(found_mod) => {this_mod = found_mod; mod_type = ModType::Map;},
-            None => return,
-        },
-    }
+
+    let found_object = find_mod_by_file_name(file_name, &mut _content_list, &mut _map_list).unwrap();
+    let this_mod = found_object.pointer;
 
     let current_dir = std::env::current_dir().unwrap().clone();
 
@@ -80,9 +87,9 @@ pub fn delete_mod(file_name: String, content_list: tauri::State<ContentList>, ma
 
     let cloned_file_name = this_mod.file_name().clone();
 
-    if mod_type == ModType::Content {
+    if found_object.mod_type == ModType::Content {
         _content_list.retain(|x| *x.file_name != cloned_file_name);
-    } else if mod_type == ModType::Map {
+    } else if found_object.mod_type == ModType::Map {
         _map_list.retain(|x| *x.file_name != cloned_file_name);
     }
 }
