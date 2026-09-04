@@ -91,31 +91,7 @@ fn get_latest_server_version() -> Result<String, Box<dyn std::error::Error>> {
 
 fn get_numbers_from_version(version: String) -> Vec<u16> {
     // versions look like: x.x.x
-    let mut numbers: Vec<u16> = Vec::new();
-    let mut current_number = String::new();
-    let mut version_chars = version.chars().peekable();
-    while let Some(chr) = version_chars.next() {
-        // numbers in the version string are separated by '.'
-        // so if the character is not '.', it has to be a number
-        if chr != '.' {
-            current_number.push(chr);
-            // peeking at the next value to see if the current character is the last in the string
-            // if it is, we push the current number and break the loop
-            if version_chars.peek().is_none() {
-                numbers.push(current_number.parse::<u16>().unwrap());
-                current_number.clear();
-                break;
-            }
-        } else {
-            // if the character is '.', push the current number to the vector
-            // and reset the current number
-            numbers.push(current_number.parse::<u16>().unwrap());
-            current_number.clear();
-            continue;
-        }
-    }
-
-    numbers
+    version.split(".").map(|x| x.parse::<u16>().unwrap()).collect()
 }
 
 fn needs_update(local_version: String, latest_version: String) -> bool {
